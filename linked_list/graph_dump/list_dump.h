@@ -1,8 +1,21 @@
 #ifndef LIST_DUMP_H
 #define LIST_DUMP_H
 
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
 #include "../super_list.h"
+
+const int          DEFAULT_BUF_SIZE = 1000;
+const char * const DUMP_FNAME       = "list_dump.svg";
+const int          STYLE_TAG_SIZE   = 1000;
+
+struct List;
+struct ListDebugInfo;
 
 typedef enum {
     LST_ERR_NO_LIST_PTR    = 1,
@@ -16,10 +29,7 @@ typedef enum {
     LST_ERR_SIZE           = 256,
 } ERRORS_LIST;
 
-const char * const DUMP_FNAME = "list_dump.svg";
-const int STYLE_TAG_SIZE = 1000;
-
-int    ListDump       (const char * fname, const List * list, size_t err_vec, ListDebugInfo debug_info);
+int    ListDump       (const char * fname, List * list, size_t err_vec, ListDebugInfo debug_info);
 char * CreateVals     (const List * list, size_t size);
 char * CreateNodes    (const List * list, size_t size);
 char * CreateEdges    (const List * list, size_t size);

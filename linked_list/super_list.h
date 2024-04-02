@@ -1,21 +1,25 @@
 #ifndef SUPER_LIST_H
 #define SUPER_LIST_H
 
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "graph_dump/list_dump.h"
 
 const char * const DOT_DUMP_FILENAME = "graph.dot";
+const char * const HTML_DUMP_FNAME   = "graph_dump/dumps/dump1.html";
 
-// #define LINEARIZATION
+#define LIST_DEBUG
 
-#define DEBUG
-
-#ifdef DEBUG
+#ifdef LIST_DEBUG
     #define ON_DEBUG(...) __VA_ARGS__;
 #else
     #define ON_DEBUG(...)
 #endif // DEBUG
 
-#ifdef DEBUG
+#ifdef LIST_DEBUG
 
     #define DEBUG_INFO(list) {#list, __FILE__, __FUNCTION__, __LINE__}
 
@@ -37,7 +41,6 @@ const char * const DOT_DUMP_FILENAME = "graph.dot";
     size_t err_vec = ListVerifier((const List *) list);              \
     if (err_vec != 0)                                                \
     {                                                                \
-                                                                     \
         ListPrintfErrCorruptedList(debug_info);                      \
         ListDump(DOT_DUMP_FILENAME, list, err_vec, debug_info);      \
         ListDtor(list);                                              \
@@ -57,7 +60,7 @@ const char * const DOT_DUMP_FILENAME = "graph.dot";
 {                                           \
     if (ListVerifyId(list, id, debug_info)) \
         ABORT_LIST(list, -1, debug_info);   \
-}
+}                                           \
 
 /**
  * @brief smooth abort, calls dump inside and destroys list
@@ -70,7 +73,6 @@ const char * const DOT_DUMP_FILENAME = "graph.dot";
     ListDump(DOT_DUMP_FILENAME, (list), (err_vec), (debug_info)); \
     ListDtor(list);                                               \
     assert (0);                                                   \
-    // abort();                                                      \
 }
 
 const int POISON = 0xD00D1E;
@@ -138,7 +140,7 @@ size_t ListVerifier (const List * list);
  * @note this func is called every time inside functions to which we pass id.
  * @warning it is usually called inside VERIFY_ID macros, which has abort inside
 */
-int ListVerifyId  (const List * list, int id, ListDebugInfo debug_info);
+int ListVerifyId  (List * list, int id, ListDebugInfo debug_info);
 #define VerifyIdList(list, id) ListVerifyId((list), (id), DEBUG_INFO(list))
 
 /**
@@ -146,12 +148,12 @@ int ListVerifyId  (const List * list, int id, ListDebugInfo debug_info);
  *
  * @param size desired size of list
  *
- * @return new list
+ * @return new list pointer
  *
  * @note after construction every element stores "POISON" and marked as free.
  * fre points to the first element, prev of each element is -1, next points to next free element
 */
-List ListCtor (int size);
+List *ListCtor (int size);
 
 /**
  * @brief destroy list (free all the allocated memory)
@@ -160,7 +162,7 @@ List ListCtor (int size);
  *
  * @return 0
 */
-int ListDtor (const List * list);
+int ListDtor (List * list);
 
 /**
  * @brief copy everything from list_src to list_dst

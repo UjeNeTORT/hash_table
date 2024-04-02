@@ -1,10 +1,4 @@
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "super_list.h"
-#include "graph_dump/list_dump.h"
 
 // DSL
 #define NEXT(index) list->next[(index)]
@@ -25,7 +19,7 @@
 */
 static ListReallocRes  ListReallocUp (List * list, int new_size, ListDebugInfo debug_info);
 
-List ListCtor (int size)
+List *ListCtor (int size)
 {
     if (size <= 0)
     {
@@ -34,19 +28,19 @@ List ListCtor (int size)
         return {};
     }
 
-    elem_t* data = (elem_t *) calloc(size, sizeof(elem_t));
-    int*    next = (int *)    calloc(size, sizeof(int));
-    int*    prev = (int *)    calloc(size, sizeof(int));
+    List    *list = (List *)   calloc (1, sizeof (List));
+    elem_t  *data = (elem_t *) calloc (size, sizeof(elem_t));
+    int     *next = (int *)    calloc (size, sizeof(int));
+    int     *prev = (int *)    calloc (size, sizeof(int));
 
-    List list = {
-        .data = data,
-        .next = next,
-        .prev = prev,
 
-        .fre  = 1,
+    list->data = data;
+    list->next = next;
+    list->prev = prev;
 
-        .size = size,
-    };
+    list->fre  = 1;
+
+    list->size = size;
 
     data[0] = POISON;
     next[0] = 0; // head
@@ -64,20 +58,22 @@ List ListCtor (int size)
     return list;
 }
 
-int ListDtor (const List * list)
+int ListDtor (List * list)
 {
     assert(list);
 
-    free(list->data);
+    free (list->data);
 
-    free(list->next);
+    free (list->next);
 
-    free(list->prev);
+    free (list->prev);
+
+    free (list);
 
     return 0;
 }
 
-ListCopyRes ListCopy (List * list_dst, const List * list_src, ListDebugInfo debug_info)
+ListCopyRes ListCopy (List * list_dst, List * list_src, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list_src, debug_info);
 
@@ -180,37 +176,6 @@ ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
     return REALLC_NO_ERR;
 }
 
-int ListMakeLinear (List * list)
-{
-    // ! dont use not finished
-
-    return -1;
-
-    // VERIFY_LIST(list, debug_info);
-
-    // List linear_list = ListCtor(list->size); //? create fresh list of the same size
-//
-    // int next_id  = 0;
-    // int logic_id = 0;
-//
-    // while (next_id != list->prev[0])
-    // {
-        // next_id = NEXT(next_id);
-//
-        // ListInsertAfter(&linear_list, logic_id, DATA(next_id));
-//
-        // logic_id++;
-    // }
-//
-    // ListDtor(list); //? good solution?
-//
-    // list = &linear_list;
-//
-    // ON_DEBUG(VERIFY_LIST(list, debug_info));
-//
-    // return 0;
-}
-
 elem_t ListIdFind (List * list, int id, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
@@ -279,6 +244,8 @@ int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info)
         // if no room left - abort
         fprintf(stderr, "ListInsertAfter: no room left for insertion\n");
         ABORT_LIST(list, -1, debug_info);
+
+        ReallocList (list, list->size + 1); // NOT OPTIMAL!
     }
 
     int new_id = list->fre;
@@ -440,7 +407,7 @@ size_t ListVerifier (const List * list)
     return err_vec;
 }
 
-int ListVerifyId (const List * list, int id, ListDebugInfo debug_info)
+int ListVerifyId (List * list, int id, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
 
@@ -463,7 +430,6 @@ int ListVerifyId (const List * list, int id, ListDebugInfo debug_info)
 
 int ListPrintfErrCorruptedList(ListDebugInfo debug_info)
 {
-    int ret_val = fprintf(stderr, "ERROR List %s called from %s (%d) is corrupted, aborting...\n", debug_info.list_name, debug_info.filename, debug_info.line);
-
-    return ret_val;
+    return fprintf(stderr, "ERROR List %s called from %s (%d) is corrupted, aborting...\n",
+                                debug_info.list_name, debug_info.filename, debug_info.line);
 }

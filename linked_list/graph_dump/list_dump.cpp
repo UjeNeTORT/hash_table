@@ -1,17 +1,6 @@
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-
-const int DEFAULT_BUF_SIZE = 1000;
-const char * HTML_DUMP_FNAME = "graph_dump/dumps/dump1.html";
-
-#include "../super_list.h"
 #include "list_dump.h"
 
-int ListDump (const char * fname, const List * list, size_t err_vec, ListDebugInfo debug_info)
+int ListDump (const char * fname, List * list, size_t err_vec, ListDebugInfo debug_info)
 {
     assert(fname);
     assert(list);
@@ -216,8 +205,8 @@ int WriteHTML (const char * HTML_fname, int dump_id, size_t err_vec, ListDebugIn
 
     fprintf(HTML_file, "<img src=\"./graph_dump_%d.png\">\n", dump_id);
 
-    fprintf(HTML_file, "<hr>\n", dump_id);
-    fprintf(HTML_file, "<hr>\n", dump_id);
+    fprintf(HTML_file, "<hr>\n");
+    fprintf(HTML_file, "<hr>\n");
 
     fclose(HTML_file);
 
