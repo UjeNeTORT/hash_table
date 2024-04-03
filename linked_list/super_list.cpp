@@ -28,10 +28,10 @@ List *ListCtor (int size)
         return {};
     }
 
-    List    *list = (List *)   calloc (1, sizeof (List));
-    elem_t  *data = (elem_t *) calloc (size, sizeof(elem_t));
-    int     *next = (int *)    calloc (size, sizeof(int));
-    int     *prev = (int *)    calloc (size, sizeof(int));
+    List        *list = (List *)   calloc (1, sizeof (List));
+    list_elem_t *data = (list_elem_t *) calloc (size + 1, sizeof(list_elem_t));
+    int         *next = (int *)    calloc (size + 1, sizeof(int));
+    int         *prev = (int *)    calloc (size + 1, sizeof(int));
 
 
     list->data = data;
@@ -42,25 +42,25 @@ List *ListCtor (int size)
 
     list->size = size;
 
-    data[0] = POISON;
+    AssignListEl (&data[0], &LIST_POISON);
     next[0] = 0; // head
     prev[0] = 0; // tail
 
-    for (int i = 1; i < size; i++)
+    for (int i = 1; i < size + 1; i++)
     {
-        data[i] = POISON;
+        AssignListEl (&data[i], &LIST_POISON);
         next[i] = i + 1;
         prev[i] = -1;
     }
 
-    next[size - 1] = -1; // no next node after the last one
+    next[size] = -1; // no next node after the last one
 
     return list;
 }
 
 int ListDtor (List * list)
 {
-    assert(list);
+    if (!list) return 0;
 
     free (list->data);
 
@@ -77,7 +77,7 @@ ListCopyRes ListCopy (List * list_dst, List * list_src, ListDebugInfo debug_info
 {
     VERIFY_LIST(list_src, debug_info);
 
-    if (!memcpy(list_dst->data, list_src->data, list_src->size * sizeof(elem_t)))
+    if (!memcpy(list_dst->data, list_src->data, list_src->size * sizeof(list_elem_t)))
     {
         return CPY_ERR_MEMCPY;
     }
@@ -135,7 +135,7 @@ ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
         return REALLC_ERR;
     }
 
-    list->data = (elem_t *) realloc(list->data, new_size * sizeof(elem_t));
+    list->data = (list_elem_t *) realloc(list->data, new_size * sizeof(list_elem_t));
     if (!list->data)
     {
         return REALLC_ERR;
@@ -163,7 +163,7 @@ ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
     for (int i = id_free; i < new_size; i++)
     {
         NEXT(i) = i + 1;
-        DATA(i) = POISON;
+        AssignListEl (&DATA(i), &LIST_POISON);
         PREV(i) = -1;
     }
 
@@ -176,23 +176,23 @@ ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
     return REALLC_NO_ERR;
 }
 
-elem_t ListIdFind (List * list, int id, ListDebugInfo debug_info)
+list_elem_t ListIdGetElem (List * list, int id, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
 
-    elem_t val = POISON;
+    list_elem_t l_elem = LIST_POISON;
 
-    if (0 < id && id < list->size)
-        val = DATA(id);
+    if (0 < id && id < list->size + 1)
+        AssignListEl (&l_elem, &DATA(id));
     else
-        fprintf(stderr, "ListIdFind: invalid id %d\n", id);
+        fprintf(stderr, "ListIdGetElem: invalid id %d\n", id);
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
-    return val;
+    return l_elem;
 }
 
-int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list, elem_t val, ListDebugInfo debug_info)
+int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
 
@@ -200,7 +200,7 @@ int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list,
 
     for (int i = NEXT(0); i != 0; i = NEXT(i))
     {
-        if (DATA(i) == val)
+        if (streq (DATA(i).word, key))
         {
             id = i;
             break;
@@ -212,29 +212,29 @@ int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list,
     return id;
 }
 
-int ListInsertBegin (List * list, elem_t val, ListDebugInfo debug_info)
+int ListInsertBegin (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
 
-    int new_id = InsertAfterList(list, 0, val);
+    int new_id = InsertAfterIdList(list, 0, key);
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id;  // where inserted value is
 }
 
-int ListInsertEnd (List * list, elem_t val, ListDebugInfo debug_info)
+int ListInsertEnd (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
 
-    int new_id = InsertAfterList(list, PREV(0), val);
+    int new_id = InsertAfterIdList(list, PREV(0), key);
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id;  // where inserted value is
 }
 
-int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info)
+int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
     VERIFY_ID(list, id, debug_info);
@@ -242,7 +242,7 @@ int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info)
     if (list->fre == -1)
     {
         // if no room left - abort
-        fprintf(stderr, "ListInsertAfter: no room left for insertion\n");
+        fprintf(stderr, "ListInsertAfterId: no room left for insertion\n");
         ABORT_LIST(list, -1, debug_info);
 
         ReallocList (list, list->size + 1); // NOT OPTIMAL!
@@ -251,7 +251,8 @@ int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info)
     int new_id = list->fre;
     list->fre = NEXT(new_id);
 
-    DATA(new_id) = val;
+    list_elem_t l_elem = {key, DEFAULT_LIST_ELEM_VALUE};
+    AssignListEl (&DATA(new_id), &l_elem);
 
     int old_nxt = NEXT(id);
 
@@ -266,19 +267,19 @@ int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info)
     return new_id; // where inserted value is
 }
 
-int ListInsertBefore (List * list, int id, elem_t val, ListDebugInfo debug_info)
+int ListInsertBefore (List * list, int id, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
     VERIFY_ID(list, id, debug_info);
 
-    int new_id = InsertAfterList(list, PREV(id), val);
+    int new_id = InsertAfterIdList(list, PREV(id), key);
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id;
 }
 
-elem_t ListIdDelete (List * list, int id, ListDebugInfo debug_info)
+list_elem_t ListIdDelete (List * list, int id, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
     VERIFY_ID(list, id, debug_info);
@@ -289,8 +290,8 @@ elem_t ListIdDelete (List * list, int id, ListDebugInfo debug_info)
     NEXT(prev) = next;
     PREV(next) = prev;
 
-    elem_t deleted_el = DATA(id);
-    DATA(id) = POISON;
+    list_elem_t deleted_el = DATA(id);
+    AssignListEl (&(DATA(id)), &LIST_POISON);
 
     PREV(id) = -1;
     NEXT(id) = list->fre;
@@ -301,16 +302,14 @@ elem_t ListIdDelete (List * list, int id, ListDebugInfo debug_info)
     return deleted_el;
 }
 
-int ListValDelete (List * list, elem_t val, ListDebugInfo debug_info)
+int ListKeyDelete (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
 
-    int id = FindValMegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToList(list, val);
+    int id = GetIdListKey (list, key);
 
     if (id != -1)
-    {
         DeleteIdList(list, id);
-    }
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
@@ -365,6 +364,7 @@ size_t ListVerifier (const List * list)
         if (cnt > list->size)
         {
             err_vec |= LST_ERR_CHAIN;
+
             break;
         }
 
@@ -391,7 +391,7 @@ size_t ListVerifier (const List * list)
     // check if nexts of free elements form chain and that their prevs = -1
     for (int i = NEXT(list->fre), cnt = 0; i != -1; i = NEXT(i), cnt++)
     {
-        if (cnt > list->size || i >= list->size)
+        if (cnt > list->size || i > list->size)
         {
             err_vec |= LST_ERR_CHAIN;
 
@@ -432,4 +432,29 @@ int ListPrintfErrCorruptedList(ListDebugInfo debug_info)
 {
     return fprintf(stderr, "ERROR List %s called from %s (%d) is corrupted, aborting...\n",
                                 debug_info.list_name, debug_info.filename, debug_info.line);
+}
+
+int IsListElemEq (const list_elem_t el_1, const list_elem_t el_2)
+{
+    return strcmp (el_1.word, el_2.word);
+}
+
+int AssignListEl (list_elem_t *el_dst, const list_elem_t *el_src)
+{
+    if (!el_dst || !el_src) return 1;
+
+    memcpy (el_dst, el_src, sizeof (list_elem_t));
+
+    return 0;
+}
+
+int IncreaseValListId (List *list, int id)
+{
+    assert (list);
+
+    if (id < 0) return 1;
+
+    DATA(id).value += 1;
+
+    return 0;
 }

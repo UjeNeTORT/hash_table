@@ -6,10 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../config.h"
+#include "../common/common.h"
 #include "graph_dump/list_dump.h"
 
 const char * const DOT_DUMP_FILENAME = "graph.dot";
-const char * const HTML_DUMP_FNAME   = "graph_dump/dumps/dump1.html";
+const char * const HTML_DUMP_FNAME   = "linked_list/graph_dump/dumps/dump1.html";
 
 #define LIST_DEBUG
 
@@ -41,7 +43,7 @@ const char * const HTML_DUMP_FNAME   = "graph_dump/dumps/dump1.html";
     size_t err_vec = ListVerifier((const List *) list);              \
     if (err_vec != 0)                                                \
     {                                                                \
-        ListPrintfErrCorruptedList(debug_info);                      \
+        ERROR ("List %s called from %s (%d) is corrupted (%#b), aborting...\n", debug_info.list_name, debug_info.filename, debug_info.line, err_vec); \
         ListDump(DOT_DUMP_FILENAME, list, err_vec, debug_info);      \
         ListDtor(list);                                              \
         abort();                                                     \
@@ -75,10 +77,6 @@ const char * const HTML_DUMP_FNAME   = "graph_dump/dumps/dump1.html";
     assert (0);                                                   \
 }
 
-const int POISON = 0xD00D1E;
-
-typedef int elem_t;
-
 typedef enum
 {
     CPY_NO_ERR     = 0, //< successfully copied
@@ -95,11 +93,11 @@ typedef enum
 /**
  * @warning access allowed only by functions ListDoSmth
  *
- * @note list node and element are synonyms. Element can be free or it can store some value of type elem_t
+ * @note list node and element are synonyms. Element can be free or it can store some value of type list_elem_t
 */
 struct List
 {
-    elem_t * data;  // by default stores POISON
+    list_elem_t * data;  // by default stores LIST_POISON
     int * next;     // contains ids of next elements for each elem. There are two separate singly-linked lists in "next" (one of them is for free nodes - it statrs at id "fre").
     int * prev;     // contains ids of prev elements for each non-free elem. If node is free, contains -1;
 
@@ -150,7 +148,7 @@ int ListVerifyId  (List * list, int id, ListDebugInfo debug_info);
  *
  * @return new list pointer
  *
- * @note after construction every element stores "POISON" and marked as free.
+ * @note after construction every element stores "LIST_POISON" and marked as free.
  * fre points to the first element, prev of each element is -1, next points to next free element
 */
 List *ListCtor (int size);
@@ -204,10 +202,10 @@ int ListMakeLinear (List * list); //! not finished
  * @param id   index of val
  *
  * @return value stored in list->data[id]
- * @return POISON if "id" stores nothing or "id" is invalid
+ * @return LIST_POISON if "id" stores nothing or "id" is invalid
 */
-elem_t ListIdFind (List * list, int id, ListDebugInfo debug_info);
-#define FindIdList(list, id) ListIdFind(list, id, DEBUG_INFO(list))
+#define GetElemListId(list, id) ListIdGetElem(list, id, DEBUG_INFO(list))
+list_elem_t ListIdGetElem (List * list, int id, ListDebugInfo debug_info);
 
 /**
  *
@@ -219,13 +217,11 @@ elem_t ListIdFind (List * list, int id, ListDebugInfo debug_info);
  * @return id of "val" in the list if found
  * @return -1 if "val" not found in the list
  *
- * @note !!! Such function name is to make user hate this function and to teach them to store indexes by themselves.
- * It is not how i name functions, it is a joke in education purposes !!!
  *
  * @warning traverses through the list. Much slower than access by id
 */
-int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list, elem_t val, ListDebugInfo debug_info);
-#define FindValMegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToList(list, val) MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind(list, val, DEBUG_INFO(list))
+#define GetIdListKey(list, key) ListKeyGetId(list, key, DEBUG_INFO(list))
+int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info);
 
 /**
  * @brief insert "val" in the beginning of the list
@@ -236,8 +232,8 @@ int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list,
  * @return id of "val" in the list
  * @return -1 if no free place in the list (no more reallocs we can do)
 */
-int ListInsertBegin (List * list, elem_t val, ListDebugInfo debug_info);
-#define InsertBeginList(list, val) ListInsertBegin(list, val, DEBUG_INFO(list))
+#define InsertBeginList(list, key) ListInsertBegin(list, key, DEBUG_INFO(list))
+int ListInsertBegin (List * list, ht_key_t key, ListDebugInfo debug_info);
 
 /**
  * @brief insert "val" in the end of the list
@@ -248,8 +244,8 @@ int ListInsertBegin (List * list, elem_t val, ListDebugInfo debug_info);
  * @return id of "val" in the list
  * @return -1 if no free place in the list (no more reallocs we can do)
 */
-int ListInsertEnd (List * list, elem_t val, ListDebugInfo debug_info);
-#define InsertEndList(list, val) ListInsertEnd(list, val, DEBUG_INFO(list))
+#define InsertEndList(list, key) ListInsertEnd(list, key, DEBUG_INFO(list))
+int ListInsertEnd (List * list, ht_key_t key, ListDebugInfo debug_info);
 
 /**
  * @brief insert "val" after value with id = "id"
@@ -261,8 +257,8 @@ int ListInsertEnd (List * list, elem_t val, ListDebugInfo debug_info);
  * @return id of new element "val" in the list
  * @return -1 if no free space in the list (no more reallocs we can do)
 */
-int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info);
-#define InsertAfterList(list, id, val) ListInsertAfter(list, id, val, DEBUG_INFO(list))
+#define InsertAfterIdList(list, id, key) ListInsertAfterId(list, id, key, DEBUG_INFO(list))
+int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_info);
 
 /**
  * @brief insert "val" before value with id = "id"
@@ -274,8 +270,8 @@ int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info);
  * @return id of new element "val" in the list
  * @return -1 if no free space in the list (no more reallocs we can do)
 */
-int ListInsertBefore (List * list, int id, elem_t val, ListDebugInfo debug_info);
-#define InsertBeforeList(list, id, val) ListInsertBefore(list, id, val, DEBUG_INFO(list))
+#define InsertBeforeList(list, id, key) ListInsertBefore(list, id, key, DEBUG_INFO(list))
+int ListInsertBefore (List * list, int id, ht_key_t key, ListDebugInfo debug_info);
 
 /**
  * @brief delete and return value with id = "id".
@@ -286,7 +282,7 @@ int ListInsertBefore (List * list, int id, elem_t val, ListDebugInfo debug_info)
  * @return id of "val" in the list if found
  * @return -1 if "val" not found in the list
 */
-elem_t ListIdDelete    (List * list, int id, ListDebugInfo debug_info);
+list_elem_t ListIdDelete    (List * list, int id, ListDebugInfo debug_info);
 #define DeleteIdList(list, id) ListIdDelete(list, id, DEBUG_INFO(list))
 
 /**
@@ -299,7 +295,13 @@ elem_t ListIdDelete    (List * list, int id, ListDebugInfo debug_info);
  * @return -1 if "val" not found in the list
  *
 */
-int ListValDelete (List * list, elem_t val, ListDebugInfo debug_info);
-#define DeleteValList(list, val) ListValDelete(list, val, DEBUG_INFO(list))
+#define DeleteKeyList(list, key) ListKeyDelete(list, key, DEBUG_INFO(list))
+int ListKeyDelete (List * list, ht_key_t key, ListDebugInfo debug_info);
+
+int IsListElemEq (const list_elem_t el_1, const list_elem_t el_2);
+
+int AssignListEl (list_elem_t *el_dst, const list_elem_t *el_src);
+
+int IncreaseValListId (List *list, int id);
 
 #endif // SUPER_LIST_H

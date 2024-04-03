@@ -13,7 +13,7 @@ OBJS = $(MAIN_NAME).o common.o list_dump.o linked_list.o hash_table.o hash_funct
 EXEC_NAME = exec
 
 start: main.o common.o list_dump.o linked_list.o  hash_table.o hash_funcs.o
-	$(CPP) $(OBJS) -o $(EXEC_NAME) $(C_FLAGS) $(OPTIMIZE) $(SANITIZER)
+	$(CPP) $(OBJS) -o $(EXEC_NAME) $(C_FLAGS) $(OPTIMIZE)
 
 run:
 	./$(EXEC_NAME)

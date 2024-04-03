@@ -18,15 +18,15 @@ struct List;
 struct ListDebugInfo;
 
 typedef enum {
-    LST_ERR_NO_LIST_PTR    = 1,
-    LST_ERR_NO_DATA_PTR    = 2,
-    LST_ERR_NO_NEXT_PTR    = 4,
-    LST_ERR_NO_PREV_PTR    = 8,
-    LST_ERR_HEAD_TAIL      = 16,
-    LST_ERR_CHAIN          = 32,
-    LST_ERR_FRE_PREV       = 64,
-    LST_ERR_FRE            = 128,
-    LST_ERR_SIZE           = 256,
+    LST_ERR_NO_LIST_PTR    = 1 << 0,
+    LST_ERR_NO_DATA_PTR    = 1 << 1,
+    LST_ERR_NO_NEXT_PTR    = 1 << 2,
+    LST_ERR_NO_PREV_PTR    = 1 << 3,
+    LST_ERR_HEAD_TAIL      = 1 << 4,
+    LST_ERR_CHAIN          = 1 << 5,
+    LST_ERR_FRE_PREV       = 1 << 6,
+    LST_ERR_FRE            = 1 << 7,
+    LST_ERR_SIZE           = 1 << 8,
 } ERRORS_LIST;
 
 int    ListDump       (const char * fname, List * list, size_t err_vec, ListDebugInfo debug_info);

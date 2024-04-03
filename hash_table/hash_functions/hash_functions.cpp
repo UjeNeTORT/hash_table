@@ -1,16 +1,16 @@
 #include "hash_functions.h"
 
-volatile u_int64_t  CalcStrHashReturnZero    (const char * const word, size_t word_length)
+volatile hash_t  CalcStrHashReturnZero    (ht_key_t key)
 {
-    assert (word);
+    assert (key);
 
     return 0;
 }
 
-volatile u_int64_t  CalcStrHashFirstLetter   (const char * const word, size_t word_length);
-volatile u_int64_t  CalcStrHashWordLength    (const char * const word, size_t word_length);
-volatile u_int64_t  CalcStrHashControlSum    (const char * const word, size_t word_length);
-volatile u_int64_t  CalcStrHashSumOverLength (const char * const word, size_t word_length);
-volatile u_int64_t  CalcStrHashDedFormula    (const char * const word, size_t word_length);
+volatile hash_t  CalcStrHashFirstLetter   (ht_key_t key);
+volatile hash_t  CalcStrHashWordLength    (ht_key_t key);
+volatile hash_t  CalcStrHashControlSum    (ht_key_t key);
+volatile hash_t  CalcStrHashSumOverLength (ht_key_t key);
+volatile hash_t  CalcStrHashDedFormula    (ht_key_t key);
 
-volatile u_int64_t  CalcStrHashCRC32         (const char * const word, size_t word_length);
+volatile hash_t  CalcStrHashCRC32         (ht_key_t key);

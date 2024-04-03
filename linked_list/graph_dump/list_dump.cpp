@@ -13,7 +13,7 @@ int ListDump (const char * fname, List * list, size_t err_vec, ListDebugInfo deb
 
     int dump_id = rand();
 
-    sprintf(command, "dot -Tpng %s -o graph_dump/dumps/graph_dump_%d.png", fname, dump_id);
+    sprintf(command, "dot -Tpng %s -o linked_list/graph_dump/dumps/graph_dump_%d.png", fname, dump_id);
     system(command);
 
     WriteHTML(HTML_DUMP_FNAME, dump_id, err_vec, debug_info);
@@ -69,7 +69,7 @@ char * CreateVals (const List * list, size_t size)
     sprintf(vals, "subgraph cluster_val {\n%n", &symbs);
     vals += symbs;
 
-    sprintf(vals, "     val_fre  [ shape = none, %s, fontcolor = white, label = \" fre\n%d \", image = \"cat.jpg\"];\n%n", style, list->fre, &symbs);
+    sprintf(vals, "     val_fre  [ shape = none, %s, fontcolor = white, label = \" fre\n%d \"];\n%n", style, list->fre, &symbs);
     vals += symbs;
 
     sprintf(vals, "}\n%n", &symbs);
@@ -99,16 +99,18 @@ char * CreateNodes (const List * list, size_t size)
                    "bgcolor=\"#B5E2FA\" \n%n", rand(), &symbs);
     nodes += symbs;
 
-    for (int i = 0; i < list->size; i++, symbs = 0)
+    for (int i = 0; i < list->size + 1; i++, symbs = 0)
     {
         if (list->prev[i] != -1)
         {
-            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#4CB944\", label = \" %d | data = %d | <fnext> next = %d | <fprev> prev = %d \"];\n%n", i, style, i, list->data[i], list->next[i], list->prev[i], &symbs);
+            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#4CB944\", label = \" %d | data = %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
+                                                                            i, style, i, list->data[i].word, list->data[i].value, list->next[i], list->prev[i], &symbs);
             nodes += symbs;
         }
         else
         {
-            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#F5EE9E\", label = \" %d | data = %d | <fnext> next = %d | <fprev> prev = %d \"];\n%n", i, style, i, list->data[i], list->next[i], list->prev[i], &symbs);
+            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#F5EE9E\", label = \" %d | data = %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
+                                                                            i, style, i, list->data[i].word, list->data[i].value, list->next[i], list->prev[i], &symbs);
             nodes += symbs;
         }
     }
