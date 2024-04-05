@@ -5,11 +5,13 @@ int ListDump (const char * fname, List * list, size_t err_vec, ListDebugInfo deb
     assert(fname);
     assert(list);
 
+    srand(time(NULL));
+
     char * dot_code = CreateDotCode(list);
 
     WriteDotCode(fname, (const char *) dot_code);
 
-    char * command = (char *) calloc(DEFAULT_BUF_SIZE, sizeof(char));
+    char * command = (char *) calloc (DEFAULT_BUF_SIZE, sizeof(char));
 
     int dump_id = rand();
 
@@ -69,10 +71,13 @@ char * CreateVals (const List * list, size_t size)
     sprintf(vals, "subgraph cluster_val {\n%n", &symbs);
     vals += symbs;
 
-    sprintf(vals, "     val_fre  [ shape = none, %s, fontcolor = white, label = \" fre\n%d \"];\n%n", style, list->fre, &symbs);
+    sprintf(vals, "     val_fre  [ shape = none, %s, fontcolor = black, label = \" fre\n%d \"];\n%n", style, list->fre, &symbs);
     vals += symbs;
 
     sprintf(vals, "}\n%n", &symbs);
+    vals += symbs;
+
+    sprintf(vals, "     val_size  [ shape = none, %s, fontcolor = black, label = \" size\n%d \"];\n%n", style, list->size, &symbs);
     vals += symbs;
 
     free(style);
@@ -99,17 +104,17 @@ char * CreateNodes (const List * list, size_t size)
                    "bgcolor=\"#B5E2FA\" \n%n", rand(), &symbs);
     nodes += symbs;
 
-    for (int i = 0; i < list->size + 1; i++, symbs = 0)
+    for (int i = 0; i < list->size; i++, symbs = 0)
     {
         if (list->prev[i] != -1)
         {
-            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#4CB944\", label = \" %d | data = %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
+            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#4CB944\", label = \" %d | %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
                                                                             i, style, i, list->data[i].word, list->data[i].value, list->next[i], list->prev[i], &symbs);
             nodes += symbs;
         }
         else
         {
-            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#F5EE9E\", label = \" %d | data = %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
+            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#F5EE9E\", label = \" %d | %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
                                                                             i, style, i, list->data[i].word, list->data[i].value, list->next[i], list->prev[i], &symbs);
             nodes += symbs;
         }
@@ -147,7 +152,7 @@ char * CreateEdges (const List * list, size_t size)
     }
 
     // next arrows
-    for (int i = 0; i < list->size; i++, symbs = 0)
+    for (int i = 0; i < list->size - 1; i++, symbs = 0)
     {
         if (list->next[i] != -1)
         {
@@ -161,11 +166,10 @@ char * CreateEdges (const List * list, size_t size)
                 sprintf(edges, "node_%d -> node_%d  [color = grey];\n%n", i, list->next[i], &symbs);
                 edges += symbs;
             }
-
         }
     }
 
-    for (int i = 0; i < list->size; i++, symbs = 0)
+    for (int i = 0; i < list->size - 1; i++, symbs = 0)
     {
         if (list->prev[i] != -1)
         {

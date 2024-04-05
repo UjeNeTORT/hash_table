@@ -23,7 +23,7 @@ void HashTableDtor (HashTable *hash_table)
     assert (hash_table);
 
     for (int i = 0; i < hash_table->size; i++)
-        ListDtor (hash_table->table[i]);
+        if (hash_table->table[i]) ListDtor (hash_table->table[i]);
 
     hash_table->size = 0;
     hash_table->hash_func = NULL;
@@ -61,18 +61,19 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
     {
         hash_table->table[hash] = ListCtor (DEFAULT_LIST_SIZE);
 
-        int ret_val = InsertBeginList (hash_table->table[hash], key);
-
-        ListDump (DOT_DUMP_FILENAME, hash_table->table[hash], 0, {NULL, NULL, NULL, 0}); // todelete
+        int ret_val = InsertEndList (hash_table->table[hash], key);
 
         return ret_val;
     }
 
     int elem_id = GetIdListKey (hash_table->table[hash], key);
 
-    int ret_val =  IncreaseValListId (hash_table->table[hash], elem_id);
+    PRINTF_DEBUG ("elem_id = %d", elem_id);
 
-    ListDump (DOT_DUMP_FILENAME, hash_table->table[hash], 0, {NULL, NULL, NULL, 0}); // todelete
+    if (elem_id == -1)
+        InsertEndList (hash_table->table[hash], key);
+
+    int ret_val =  IncreaseValListId (hash_table->table[hash], elem_id);
 
     return ret_val;
 }

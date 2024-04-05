@@ -144,14 +144,14 @@ int ListVerifyId  (List * list, int id, ListDebugInfo debug_info);
 /**
  * @brief create new list of size "size"
  *
- * @param size desired size of list
+ * @param list_capacity list capacity > 0
  *
  * @return new list pointer
  *
  * @note after construction every element stores "LIST_POISON" and marked as free.
  * fre points to the first element, prev of each element is -1, next points to next free element
 */
-List *ListCtor (int size);
+List *ListCtor (int list_capacity);
 
 /**
  * @brief destroy list (free all the allocated memory)
