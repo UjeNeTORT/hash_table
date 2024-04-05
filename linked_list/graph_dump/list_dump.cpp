@@ -139,7 +139,7 @@ char * CreateEdges (const List * list, size_t size)
 
     char * style = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
 
-    if (list->fre != -1)
+    if (list->fre != list->size)
     {
         sprintf(edges, "val_fre -> node_%d;\n%n", list->fre, &symbs);
         edges += symbs;

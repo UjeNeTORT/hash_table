@@ -240,7 +240,6 @@ int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_in
 
     PREV(old_nxt) = new_id;
 
-    ListDump (DOT_DUMP_FILENAME, list, 0, debug_info);
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id; // where inserted value is
@@ -432,8 +431,6 @@ int IncreaseValListId (List *list, int id)
     if (id < 0) return 1;
 
     DATA(id).value += 1;
-
-    ListDump (DOT_DUMP_FILENAME, list, 0, {NULL, NULL, NULL, NULL});
 
     return 0;
 }

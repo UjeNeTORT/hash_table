@@ -68,8 +68,6 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
 
     int elem_id = GetIdListKey (hash_table->table[hash], key);
 
-    PRINTF_DEBUG ("elem_id = %d", elem_id);
-
     if (elem_id == -1)
         InsertEndList (hash_table->table[hash], key);
 
