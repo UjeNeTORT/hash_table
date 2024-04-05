@@ -4,7 +4,7 @@
  * email: tikhonovty@gmail.com
  * telegram: https://t.me/netortofficial
  * GitHub:   https://github.com/UjeNeTORT
- * repo:     https://github.com/UjeNeTORT/MandelbrotSet
+ * repo:     https://github.com/UjeNeTORT/hash_table
  *************************************************************************/
 
 #include <assert.h>
@@ -24,8 +24,6 @@ int PrintfDebug (const char * funcname, int line, const char * filename, const c
     #else
         fprintf (stderr, GREEN_CLR "[DEBUG] ");
     #endif // DEBUG_PRINTFS_DETAILED
-
-
 
     va_list ptr;
 
@@ -107,4 +105,17 @@ int PrintProgressBar (unsigned curr_progress, unsigned max_progress)
                     prefix, progress_bar, suffix, curr_progress, max_progress);
 
     return 0;
+}
+
+u_int64_t GetCPUTicks ()
+{
+    u_int64_t ticks_rax = 0;
+    u_int64_t ticks_rdx = 0;
+
+    asm volatile (
+        "rdtsc\n\t"
+        : "=a" (ticks_rax), "=d" (ticks_rdx)
+    );
+
+    return (ticks_rdx << 32) | ticks_rax;
 }

@@ -66,4 +66,6 @@ int DelExtension   (char* filename);
 
 int PrintProgressBar (unsigned count, unsigned max);
 
+u_int64_t GetCPUTicks ();
+
 #endif // TOOLS_H
