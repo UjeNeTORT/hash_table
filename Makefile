@@ -9,11 +9,11 @@ OPTIMIZE = -O0
 SANITIZER = -fsanitize=address
 
 MAIN_NAME  = main
-OBJS = $(MAIN_NAME).o common.o list_dump.o linked_list.o hash_table.o hash_functions.o
+OBJS = $(MAIN_NAME).o common.o list_dump.o linked_list.o hash_table.o hash_functions.o hash_functions_analysis.o
 EXEC_NAME = exec
 
-start: main.o common.o list_dump.o linked_list.o  hash_table.o hash_funcs.o
-	$(CPP) $(OBJS) -o $(EXEC_NAME) $(C_FLAGS) $(OPTIMIZE)
+start: main.o common.o list_dump.o linked_list.o  hash_table.o hash_funcs.o hf_analysis.o
+	$(CPP) $(OBJS) -o $(EXEC_NAME) $(C_FLAGS) $(OPTIMIZE) -lz
 
 run:
 	./$(EXEC_NAME)
@@ -39,6 +39,8 @@ hash_table.o: ./hash_table/*
 hash_funcs.o: ./hash_table/hash_functions/*
 	$(CPP) ./hash_table/hash_functions/hash_functions.cpp -c -o hash_functions.o
 
+hf_analysis.o: ./hash_table/analysis/*
+	$(CPP) ./hash_table/analysis/hash_functions_analysis.cpp -c -o hash_functions_analysis.o
 clean:
 	rm -f $(EXEC_NAME)
 	rm -f *.out
