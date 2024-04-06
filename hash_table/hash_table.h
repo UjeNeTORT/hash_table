@@ -9,7 +9,8 @@
 #include "../common/common.h"
 #include "../linked_list/super_list.h"
 
-const size_t DEFAULT_LIST_SIZE = 1;
+const size_t MAX_N_LINES          = 5 * 1e5;
+const size_t EXPECTED_WORD_LENGTH = 6;
 
 struct HashTable
 {
@@ -27,6 +28,10 @@ int         HashTableInsert     (HashTable *hash_table, ht_key_t key);
 int         HashTableRemove     (HashTable *hash_table, ht_key_t key);
 
 int         HashTableGetVal     (HashTable *hash_table, ht_key_t key);
+
+int HashTableLoadTargetData     (HashTable *hash_table,
+                                 char      *delimited_text_buff,
+                                 int        delimiter_char);
 
 int         HashTableVerifier   ();
 int         HashTableDump       ();

@@ -8,8 +8,7 @@ HashTable *HashTableCtor (
 
     hash_table->table = (List **) calloc (hash_table_size, sizeof (List *));
 
-    // for (int i = 0; i < hash_table_size; i++)
-    //     hash_table->table[i] = ListCtor (DEFAULT_LIST_SIZE);
+    // TODO check if size is prime
 
     hash_table->size = hash_table_size;
 
@@ -39,7 +38,7 @@ int HashTableGetVal (HashTable *hash_table, ht_key_t key)
     assert (hash_table);
     assert (key);
 
-    hash_t hash = hash_table->hash_func (key);
+    hash_t hash = hash_table->hash_func (key) % hash_table->size;
 
     int elem_id = GetIdListKey (hash_table->table[hash], key);
 
@@ -55,7 +54,7 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
     assert (hash_table);
     assert (key);
 
-    hash_t hash = hash_table->hash_func (key);
+    hash_t hash = hash_table->hash_func (key) % hash_table->size;
 
     if (!hash_table->table[hash])
     {
@@ -74,6 +73,33 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
     int ret_val =  IncreaseValListId (hash_table->table[hash], elem_id);
 
     return ret_val;
+}
+
+int HashTableLoadTargetData (HashTable *hash_table,
+                             char      *delimited_text_buff,
+                             int        delimiter_char)
+{
+    assert (hash_table);
+    assert (delimited_text_buff);
+
+    int n_line = 0;
+    char *buf_pos = delimited_text_buff;
+
+    for (n_line = 0; n_line < MAX_N_LINES; n_line++)
+    {
+        char *curr_word = buf_pos;
+
+        buf_pos = strchr (buf_pos, delimiter_char);
+        if (!buf_pos) break;
+        *buf_pos = 0; // delim char -> \0
+        buf_pos++;    // next letter
+
+        HashTableInsert (hash_table, curr_word);
+    }
+    if (n_line == MAX_N_LINES - 1)
+        WARN ("only MAX_N_LINES = %llu can be readen, all the rest will be ignored", MAX_N_LINES);
+
+    return n_line + 1; // number of readen lines
 }
 
 // int HashTableRemove (HashTable *hash_table, ht_key_t key);
