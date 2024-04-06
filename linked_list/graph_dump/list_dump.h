@@ -10,7 +10,7 @@
 
 #include "../super_list.h"
 
-const int          DEFAULT_BUF_SIZE = 1000;
+const int          DEFAULT_BUF_SIZE = 1000000;
 const char * const DUMP_FNAME       = "list_dump.svg";
 const int          STYLE_TAG_SIZE   = 1000;
 

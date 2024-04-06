@@ -103,7 +103,9 @@ struct List
 
     int fre;        // id of first free node in "next" array
 
-    int size;       // list size, can be changed via ListRealloc
+    int cells_used; // n of cells which store elements
+    int size;       // list size (including fictitious element), can be changed via ListRealloc
+                    // list capacity is always = size - 1
 };
 
 struct ListDebugInfo

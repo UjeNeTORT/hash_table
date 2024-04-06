@@ -177,13 +177,11 @@ int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
     int id = -1; // not found
 
     for (int i = NEXT(0); i != 0; i = NEXT(i))
-    {
-        if (streq (DATA(i).word, key))
+        if (streq (DATA(i).key, key))
         {
             id = i;
             break;
         }
-    }
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
@@ -217,13 +215,8 @@ int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_in
     VERIFY_LIST(list, debug_info);
     VERIFY_ID(list, id, debug_info);
 
-    if (list->fre == list->size)
-    {
-        // if no room left - realloc
-
-        ReallocList (list, list->size + 1);
-        LOG ("list reallocd");
-    }
+    // if no room left - realloc
+    if (list->fre == list->size) ReallocList (list, list->size + 1);
 
     int new_id = list->fre;
     list->fre = NEXT(new_id);
@@ -239,6 +232,7 @@ int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_in
     NEXT(new_id) = old_nxt;
 
     PREV(old_nxt) = new_id;
+    list->cells_used++;
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
@@ -274,6 +268,7 @@ list_elem_t ListIdDelete (List * list, int id, ListDebugInfo debug_info)
     PREV(id) = -1;
     NEXT(id) = list->fre;
     list->fre = id;
+    list->cells_used--;
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
@@ -412,7 +407,7 @@ int ListPrintfErrCorruptedList(ListDebugInfo debug_info)
 
 int IsListElemEq (const list_elem_t el_1, const list_elem_t el_2)
 {
-    return strcmp (el_1.word, el_2.word);
+    return strcmp (el_1.key, el_2.key);
 }
 
 int AssignListEl (list_elem_t *el_dst, const list_elem_t *el_src)

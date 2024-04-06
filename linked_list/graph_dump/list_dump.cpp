@@ -109,13 +109,13 @@ char * CreateNodes (const List * list, size_t size)
         if (list->prev[i] != -1)
         {
             sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#4CB944\", label = \" %d | %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
-                                                                            i, style, i, list->data[i].word, list->data[i].value, list->next[i], list->prev[i], &symbs);
+                                                                            i, style, i, list->data[i].key, list->data[i].value, list->next[i], list->prev[i], &symbs);
             nodes += symbs;
         }
         else
         {
             sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#F5EE9E\", label = \" %d | %s (%d) | <fnext> next = %d | <fprev> prev = %d \"];\n%n",
-                                                                            i, style, i, list->data[i].word, list->data[i].value, list->next[i], list->prev[i], &symbs);
+                                                                            i, style, i, list->data[i].key, list->data[i].value, list->next[i], list->prev[i], &symbs);
             nodes += symbs;
         }
     }
