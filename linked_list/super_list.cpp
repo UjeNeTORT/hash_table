@@ -233,6 +233,7 @@ int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_in
 
     PREV(old_nxt) = new_id;
     list->cells_used++;
+    list->elems_stored++;
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
@@ -425,7 +426,8 @@ int IncreaseValListId (List *list, int id)
 
     if (id < 0) return 1;
 
-    DATA(id).value += 1;
+    DATA(id).value++;
+    list->elems_stored++;
 
     return 0;
 }

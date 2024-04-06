@@ -104,6 +104,7 @@ struct List
     int fre;        // id of first free node in "next" array
 
     int cells_used; // n of cells which store elements
+    int elems_stored; // n of elements stored in list (sum of all values)
     int size;       // list size (including fictitious element), can be changed via ListRealloc
                     // list capacity is always = size - 1
 };
