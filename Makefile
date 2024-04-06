@@ -44,3 +44,7 @@ clean:
 	rm -f *.out
 	rm -f *.exe
 	rm -f *.o
+
+deldumps:
+	rm -f ./linked_list/graph_dump/dumps/*
+	rm -f *.dot
