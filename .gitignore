@@ -26,6 +26,10 @@
 *.a
 *.lib
 
+# Big texts
+/texts/preprocessed
+/texts/raw
+
 # Executables
 *.exe
 *.out
