@@ -63,6 +63,31 @@ int PrintfError (const char * funcname, int line, const char * filename, const c
     return res;
 }
 
+int PrintfWarning (const char * funcname, int line, const char * filename, const char * format, ...)
+{
+    assert (funcname);
+    assert (filename);
+    assert (format);
+
+    #ifdef ERROR_PRINTFS_DETAILED
+        fprintf (stderr, MAGENTA_CLR "[%s:%d %s]\nWARNING: ", funcname, line, filename);
+    #else
+        fprintf (stderr, RED_CLR "[ERROR] ");
+    #endif // ERROR_PRINTFS_DETAILED
+
+    va_list ptr;
+
+    va_start (ptr, format);
+
+    int res = vfprintf (stderr, format, ptr);
+
+    va_end (ptr);
+
+    fprintf (stdout, RST_CLR "\n" );
+
+    return res;
+}
+
 int PrintfLog (const char * funcname, int line, const char * filename, const char * format, ...)
 {
     assert (funcname);
