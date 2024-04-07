@@ -26,9 +26,10 @@
 *.a
 *.lib
 
-# Big texts
+# Big texts and csv
 /texts/preprocessed
 /texts/raw
+*.csv
 
 # Executables
 *.exe
