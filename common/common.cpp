@@ -118,13 +118,13 @@ int PrintProgressBar (unsigned curr_progress, unsigned max_progress)
     assert (curr_progress <= max_progress);
     // assert (max != 0);
 
-    const char prefix[] = "---[";
-    const char suffix[] = "]---";
+    const char prefix[] = BLUE ("---[");
+    const char suffix[] = BLUE ("]---");
 
     char progress_bar[PROGRESS_BAR_LENGTH + 1] = {};
 
     for (size_t i = 0; i < PROGRESS_BAR_LENGTH; i++)
-        progress_bar[i] = (i * max_progress <= curr_progress * PROGRESS_BAR_LENGTH) ? '#' : '_';
+        progress_bar[i] = (i * max_progress < curr_progress * PROGRESS_BAR_LENGTH) ? '#' : '_';
 
     fprintf (stderr, "\r%s%s%s (%d/%d)",
                     prefix, progress_bar, suffix, curr_progress, max_progress);
