@@ -21,7 +21,7 @@ int main ()
                                     CalcStrHashSumOverLength,
                                     CalcStrHashCRC32};
 
-    AnalyzeMultipleHashFuncsFile (res_paths, "texts/preprocessed/GeorgeRRMartin.txt", hash_funcs, 1001, sizearr (hash_funcs));
+    AnalyzeMultipleHashFunctions (res_paths, "texts/preprocessed/GeorgeRRMartin.txt", hash_funcs, 1001, sizearr (hash_funcs));
 
     return 0;
 }
