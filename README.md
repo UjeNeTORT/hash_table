@@ -21,10 +21,9 @@
 В моей работе используется вариант с двусвязными списками:
 
 <picture>
-
   <source media="(prefers-color-scheme: dark)" srcset="img/hash_table_dark.png">
   <source media="(prefers-color-scheme: light)" srcset="img/hash_table_light.png">
-
+  <img alt="shows diagram with hash table working principles." src="img/hash_table_light.png">
 </picture>
 
 ## Измерение производительности
