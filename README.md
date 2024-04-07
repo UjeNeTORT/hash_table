@@ -97,6 +97,8 @@ $h(key) = sum(key)$ - сумма ASCII кодов букв слова key
 
 Подводный камень:
 **давайте увеличим размер хэш табицы:**
+
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="img/load_hists/ctrl_sum_hf_long_dark_background.png">
   <source media="(prefers-color-scheme: light)" srcset="img/load_hists/ctrl_sum_hf_long_ggplot.png">
