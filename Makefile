@@ -5,7 +5,7 @@ C_FLAGS = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-eq
 -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
 CPP = g++
-OPTIMIZE = -O0
+OPTIMIZE = -O1
 SANITIZER = -fsanitize=address
 
 MAIN_NAME  = main
@@ -19,7 +19,10 @@ run:
 	./$(EXEC_NAME)
 
 test:
-	./$(EXEC_NAME) --test-performance
+	./$(EXEC_NAME) --analyze-hash-functions
+
+test-performance:
+	./$(EXEC_NAME) --test-performance hash_table/analysis/results/performance/res.csv texts/preprocessed/words_ready.txt texts/preprocessed/GeorgeRRMartin.txt
 
 main.o: ./$(MAIN_NAME).cpp
 	$(CPP) ./$(MAIN_NAME).cpp -c -o $(MAIN_NAME).o
@@ -41,6 +44,7 @@ hash_funcs.o: ./hash_table/hash_functions/*
 
 hf_analysis.o: ./hash_table/analysis/*
 	$(CPP) ./hash_table/analysis/hash_functions_analysis.cpp -c -o hash_functions_analysis.o
+
 clean:
 	rm -f $(EXEC_NAME)
 	rm -f *.out
