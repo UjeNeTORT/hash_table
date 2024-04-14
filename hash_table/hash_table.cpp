@@ -1,12 +1,12 @@
 #include "hash_table.h"
 
 HashTable *HashTableCtor (
-    size_t hash_table_size,
+    size_t          hash_table_size,
     hash_func_ptr_t hash_func_ptr)
 {
     HashTable *hash_table = (HashTable *) calloc (1, sizeof (HashTable));
 
-    hash_table->table = (List **) calloc (hash_table_size, sizeof (List *));
+    hash_table->table = (List **) calloc (hash_table_size + 1, sizeof (List *));
 
     // TODO check if size is prime
 
@@ -40,7 +40,10 @@ int HashTableGetVal (HashTable *hash_table, ht_key_t key)
 
     hash_t hash = hash_table->hash_func (key) % hash_table->size;
 
-    int elem_id = GetIdListKey (hash_table->table[hash], key);
+    int elem_id = -1;
+
+    if (hash_table->table[hash])
+        elem_id = GetIdListKey (hash_table->table[hash], key);
 
     if (elem_id == -1) return LIST_POISON.value;
 
@@ -100,15 +103,4 @@ int HashTableLoadTargetData (HashTable *hash_table,
         WARN ("only MAX_N_LINES = %llu can be readen, all the rest will be ignored", MAX_N_LINES);
 
     return n_line + 1; // number of readen lines
-}
-
-// int HashTableRemove (HashTable *hash_table, ht_key_t key);
-
-list_elem_t GetTempListEl (ht_key_t key)
-{
-    assert (key);
-
-    list_elem_t temp_list_el = {key, LIST_POISON.value};
-
-    return temp_list_el;
 }

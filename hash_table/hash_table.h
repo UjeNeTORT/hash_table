@@ -36,6 +36,4 @@ int HashTableLoadTargetData     (HashTable *hash_table,
 int         HashTableVerifier   ();
 int         HashTableDump       ();
 
-list_elem_t GetTempListEl       (ht_key_t key);
-
 #endif // HASH_TABLE_H
