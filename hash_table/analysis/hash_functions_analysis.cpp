@@ -115,6 +115,8 @@ int TestPerformanceMultipleHashFunctions (FILE                          *test_re
     }
 
     fread (preprocessed_target_data_buf, sizeof (char), fsize, preprocessed_target_data_file);
+
+    fprintf (test_results_file, "name, mean, var, min_v, max_v\n");
     LOG ("Running tests...");
     for (size_t n_hf = 0; n_hf < n_hash_functions; n_hf++)
     {
@@ -194,38 +196,64 @@ int RunPerformanceTestHashTable (FILE               *test_results_file,
     assert (hash_table);
     assert (test_name);
 
-    int n_tests = 0;
+    size_t n_test      = 0;
+    size_t max_n_tests = 0;
     char key[MAX_WORD_LEN] = {};
-    double mean_val = 0;
-    size_t sum      = 0;
+
+    size_t mean_val     = 0;
+    double variance     = 0;
+    size_t sum          = 0;
+    size_t sqr_delta    = 0;
+    size_t min_test_res = -1;
+    size_t max_test_res = 0;
+
     size_t max_fpos = GetFileSize (test_cases_file);
+
+    fscanf (test_cases_file, "%lu", &max_n_tests);
+
+    u_int64_t *test_results = (u_int64_t *) calloc (max_n_tests, sizeof (u_int64_t));
 
     fprintf (test_results_file, "%s, ", test_name);
 
+    LOG ("Start testing \"%s\" (%lu testcases, %lu ht n elems)", test_name, max_n_tests, hash_table->n_elems);
+
     while (fscanf (test_cases_file, "%s\n", key) == 1)
     {
-        size_t curr_fpos = ftell (test_cases_file);
-
-        // if (n_tests % PROGRESS_BAR_SYNC_PERIOD == 0) PrintProgressBar (curr_fpos, max_fpos);
-
         u_int64_t test_res = -GetCPUTicks ();
 
         HashTableGetVal (hash_table, key);
 
         test_res += GetCPUTicks ();
 
+        test_results[n_test] = test_res;
+
+        if (test_res > max_test_res) max_test_res = test_res;
+        if (test_res < min_test_res) min_test_res = test_res;
+
         sum += test_res; // contains sum of elements
 
-        // if (n_tests % PROGRESS_BAR_SYNC_PERIOD == 0) PrintProgressBar (curr_fpos + 1, max_fpos);
-
-        n_tests++;
+        n_test++;
     }
 
-    mean_val = sum / (n_tests+1);
+    mean_val = sum / (n_test + 1);
 
-    fprintf (test_results_file, "%lg\n", mean_val);
+    LOG ("Test results data filled, calculating variance...");
 
-    return n_tests;
+    for (size_t i = 0; i <= n_test; i++)
+    {
+        size_t delta = test_results[i] - mean_val;
+        sqr_delta += delta * delta;
+    }
+
+    variance = sqrt( sqr_delta / (n_test + 1));
+
+    fprintf (test_results_file, "%lu, %lg, %lu, %lu\n", mean_val, variance, min_test_res, max_test_res);
+
+    free (test_results);
+
+    LOG ("Testing \"%s\" finished", test_name);
+
+    return n_test;
 }
 
 size_t GetFileSize (FILE *file)

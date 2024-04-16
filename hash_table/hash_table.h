@@ -16,6 +16,7 @@ struct HashTable
 {
     List            **table;
     size_t          size;
+    size_t          n_elems;
     hash_func_ptr_t hash_func;
 };
 

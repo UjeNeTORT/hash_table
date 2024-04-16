@@ -1,6 +1,7 @@
 #ifndef HASH_FUNCTIONS_ANALYSIS
 #define HASH_FUNCTIONS_ANALYSIS
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

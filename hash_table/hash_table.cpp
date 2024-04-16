@@ -25,6 +25,7 @@ void HashTableDtor (HashTable *hash_table)
         if (hash_table->table[i]) ListDtor (hash_table->table[i]);
 
     hash_table->size = 0;
+    hash_table->n_elems = 0;
     hash_table->hash_func = NULL;
 
     free (hash_table->table);
@@ -64,6 +65,7 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
         hash_table->table[hash] = ListCtor (DEFAULT_LIST_SIZE);
 
         int ret_val = InsertEndList (hash_table->table[hash], key);
+        hash_table->n_elems++;
 
         return ret_val;
     }
@@ -71,9 +73,12 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
     int elem_id = GetIdListKey (hash_table->table[hash], key);
 
     if (elem_id == -1)
+    {
         InsertEndList (hash_table->table[hash], key);
+        hash_table->n_elems++;
+    }
 
-    int ret_val =  IncreaseValListId (hash_table->table[hash], elem_id);
+    int ret_val = IncreaseValListId (hash_table->table[hash], elem_id);
 
     return ret_val;
 }
@@ -93,14 +98,14 @@ int HashTableLoadTargetData (HashTable *hash_table,
         char *curr_word = buf_pos;
 
         buf_pos = strchr (buf_pos, delimiter_char);
-        if (!buf_pos) break;
+        if (!buf_pos) break; // no delimiters left => break
         *buf_pos = 0; // delim char -> \0
         buf_pos++;    // next letter
 
         HashTableInsert (hash_table, curr_word);
     }
-    if (n_line == MAX_N_LINES - 1)
-        WARN ("only MAX_N_LINES = %llu can be readen, all the rest will be ignored", MAX_N_LINES);
+    // if (n_line == MAX_N_LINES - 1)
+        // WARN ("only MAX_N_LINES = %llu can be readen, all the rest will be ignored", MAX_N_LINES);
 
     return n_line + 1; // number of readen lines
 }

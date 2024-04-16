@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#define NDEBUG
+
 #include "hash_table/hash_table.h"
 #include "hash_table/hash_functions/hash_functions.h"
 #include "hash_table/analysis/hash_functions_analysis.h"
@@ -39,6 +41,7 @@ const char * const DFLT_PREPROCESSED_TARGET_DATA_PATH
                                              = "texts/preprocessed/GeorgeRRMartin.txt";
 const char * const DFLT_TEST_RESULTS_PATH    = "hash_table/analysis/results/performance/res.csv";
 const char * const DFLT_TEST_CASES_PATH      = "texts/preprocessed/words_ready.txt";
+// const char * const DFLT_TEST_CASES_PATH      = "texts/preprocessed/small.txt";
 const int DFLT_HASH_TABLE_SIZE               = 1001;
 
 int main (int argc, const char **argv)
@@ -49,7 +52,6 @@ int main (int argc, const char **argv)
 
     while (argc > 1)
     {
-
         if (streq (*argv, "--help"))
         {
             printf ("-ahf | analyze hash functions\n"
