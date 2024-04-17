@@ -9,6 +9,8 @@
 #include "../common/common.h"
 #include "../linked_list/super_list.h"
 
+#define BRANCH_PREDICTION_OPTIMIZATION
+
 const size_t MAX_N_LINES          = 5 * 1e5;
 const size_t EXPECTED_WORD_LENGTH = 6;
 

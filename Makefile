@@ -1,7 +1,7 @@
-C_FLAGS = -DNDEBUG
+C_FLAGS =
 
 CPP = g++
-OPTIMIZE = -O3
+OPTIMIZE = -O1
 SANITIZER = -fsanitize=address
 
 MAIN_NAME  = main
@@ -50,3 +50,4 @@ clean:
 deldumps:
 	rm -f ./linked_list/graph_dump/dumps/*
 	rm -f *.dot
+

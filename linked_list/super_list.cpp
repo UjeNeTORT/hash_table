@@ -90,7 +90,6 @@ ListCopyRes ListCopy (List * list_dst, List * list_src, ListDebugInfo debug_info
     {
         return CPY_ERR_MEMCPY;
     }
-
     list_dst->fre = list_src->fre;
 
     return CPY_NO_ERR;
@@ -156,14 +155,12 @@ ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
 
 list_elem_t ListIdGetElem (List * list, int id, ListDebugInfo debug_info)
 {
+    assert (0 < id && id <= list->size);
     VERIFY_LIST(list, debug_info);
 
     list_elem_t l_elem = LIST_POISON;
 
-    if (0 < id && id <= list->size)
-        AssignListEl (&l_elem, &DATA(id));
-    else
-        fprintf(stderr, "ListIdGetElem: invalid id %d\n", id);
+    AssignListEl (&l_elem, &DATA(id));
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
@@ -187,6 +184,29 @@ int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
 
     return id;
 }
+
+int ListKeyGetValSorted (List * list, ht_key_t key, ListDebugInfo debug_info)
+{
+    VERIFY_LIST(list, debug_info);
+
+    int value = LIST_POISON.value;
+    size_t curr_id = NEXT (0);
+
+    while (strcmp (DATA (curr_id).key, key) < 0)
+    {
+        if (curr_id == PREV (0)) goto verify_and_return;
+
+        curr_id = NEXT (curr_id);
+    }
+
+    if (strcmp (DATA (curr_id).key, key) == 0) value = DATA (curr_id).value;
+
+verify_and_return:
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
+
+    return value;
+}
+
 
 int ListInsertBegin (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
@@ -248,6 +268,49 @@ int ListInsertBefore (List * list, int id, ht_key_t key, ListDebugInfo debug_inf
     int new_id = InsertAfterIdList(list, PREV(id), key);
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
+
+    return new_id;
+}
+
+int ListInsertSorted (List * list, ht_key_t key, ListDebugInfo debug_info)
+{
+    VERIFY_LIST (list, debug_info);
+
+    int    new_id  = -1;
+    size_t curr_id = NEXT (0);
+
+    if (list->size == 1)
+    {
+        new_id = InsertBeginList (list, key);
+
+        goto verify_and_return;
+    }
+
+    while (strcmp (DATA (curr_id).key, key) < 0)
+    {
+        if (curr_id == PREV (0))
+        {
+            new_id = InsertEndList (list, key);
+
+            goto verify_and_return;
+        }
+
+        curr_id = NEXT (curr_id);
+    }
+
+    if (strcmp (DATA (curr_id).key, key) == 0)
+    {
+        DATA (curr_id).value++;
+        new_id = curr_id;
+
+        goto verify_and_return;
+    }
+
+    new_id = InsertAfterIdList (list, curr_id, key);
+
+verify_and_return:
+
+    ON_DEBUG (VERIFY_LIST (list, debug_info));
 
     return new_id;
 }

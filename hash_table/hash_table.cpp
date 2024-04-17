@@ -41,16 +41,27 @@ int HashTableGetVal (HashTable *hash_table, ht_key_t key)
 
     hash_t hash = hash_table->hash_func (key) % hash_table->size;
 
-    int elem_id = -1;
+    #ifdef BRANCH_PREDICTION_OPTIMIZATION
 
-    if (hash_table->table[hash])
-        elem_id = GetIdListKey (hash_table->table[hash], key);
+        if (hash_table->table[hash])
+            return GetValSortedListKey (hash_table->table[hash], key);
+        else
+            return LIST_POISON.value;
 
-    if (elem_id == -1) return LIST_POISON.value;
+    #else
 
-    list_elem_t l_elem = GetElemListId (hash_table->table[hash], elem_id);
+        int elem_id = -1;
 
-    return l_elem.value;
+        if (hash_table->table[hash])
+            elem_id = GetIdListKey (hash_table->table[hash], key);
+        else
+            return LIST_POISON.value;
+
+        list_elem_t l_elem = GetElemListId (hash_table->table[hash], elem_id);
+
+        return l_elem.value;
+
+    #endif // BRANCH_PREDICTION_OPTIMIZATION
 }
 
 int HashTableInsert (HashTable *hash_table, ht_key_t key)
@@ -70,15 +81,23 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
         return ret_val;
     }
 
-    int elem_id = GetIdListKey (hash_table->table[hash], key);
+    #ifdef BRANCH_PREDICTION_OPTIMIZATION
 
-    if (elem_id == -1)
-    {
-        InsertEndList (hash_table->table[hash], key);
-        hash_table->n_elems++;
-    }
+        int ret_val = InsertSortedList (hash_table->table[hash], key);
 
-    int ret_val = IncreaseValListId (hash_table->table[hash], elem_id);
+    #else
+
+        int elem_id = GetIdListKey (hash_table->table[hash], key);
+
+        if (elem_id == -1)
+        {
+            InsertEndList (hash_table->table[hash], key);
+            hash_table->n_elems++;
+        }
+
+        int ret_val = IncreaseValListId (hash_table->table[hash], elem_id);
+   
+    #endif // BRANCH_PREDICTION_OPTIMIZATION
 
     return ret_val;
 }
@@ -103,9 +122,10 @@ int HashTableLoadTargetData (HashTable *hash_table,
         buf_pos++;    // next letter
 
         HashTableInsert (hash_table, curr_word);
-    }
-    // if (n_line == MAX_N_LINES - 1)
-        // WARN ("only MAX_N_LINES = %llu can be readen, all the rest will be ignored", MAX_N_LINES);
+        
+        if (n_line % 10000 == 0)
+            printf ("%d / %d\n", n_line, MAX_N_LINES);
+    } 
 
     return n_line + 1; // number of readen lines
 }

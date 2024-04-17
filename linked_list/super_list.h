@@ -31,6 +31,7 @@ const char * const HTML_DUMP_FNAME   = "linked_list/graph_dump/dumps/dump1.html"
 
 #endif
 
+#ifdef LIST_DEBUG
 /**
  * @brief abort program and calls dump if list is corrupted, else do nothing
  *
@@ -38,19 +39,19 @@ const char * const HTML_DUMP_FNAME   = "linked_list/graph_dump/dumps/dump1.html"
  *
  * @warning abort inside
 */
-#define VERIFY_LIST(list, debug_info)                                \
-{                                                                    \
-    size_t err_vec = ListVerifier((const List *) list);              \
-    if (err_vec != 0)                                                \
-    {                                                                \
-        ERROR ("List %s called from %s (%d) is corrupted (%#b), aborting...\n", debug_info.list_name, debug_info.filename, debug_info.line, err_vec); \
-        ListDump(DOT_DUMP_FILENAME, list, err_vec, debug_info);      \
-        ListDtor(list);                                              \
-        abort();                                                     \
-    }                                                                \
-}
+    #define VERIFY_LIST(list, debug_info)                                \
+    {                                                                    \
+        size_t err_vec = ListVerifier((const List *) list);              \
+        if (err_vec != 0)                                                \
+        {                                                                \
+            ERROR ("List %s called from %s (%d) is corrupted (%#b), aborting...\n", debug_info.list_name, debug_info.filename, debug_info.line, err_vec); \
+            ListDump(DOT_DUMP_FILENAME, list, err_vec, debug_info);      \
+            ListDtor(list);                                              \
+            abort();                                                     \
+        }                                                                \
+    }
 
-/**
+    /**
  * @brief abort if id not allowed for list, otherwise do nothing
  *
  * @param list list
@@ -58,11 +59,17 @@ const char * const HTML_DUMP_FNAME   = "linked_list/graph_dump/dumps/dump1.html"
  *
  * @warning abort inside
 */
-#define VERIFY_ID(list, id, debug_info)     \
-{                                           \
-    if (ListVerifyId(list, id, debug_info)) \
-        ABORT_LIST(list, -1, debug_info);   \
-}                                           \
+    #define VERIFY_ID(list, id, debug_info)     \
+    {                                           \
+        if (ListVerifyId(list, id, debug_info)) \
+            ABORT_LIST(list, -1, debug_info);   \
+    }
+#else
+
+    #define VERIFY_LIST(list, debug_info) ;
+    #define VERIFY_ID(list, id, debug_info) ;
+
+#endif // LIST_DEBUG                                     \
 
 /**
  * @brief smooth abort, calls dump inside and destroys list
@@ -226,6 +233,9 @@ list_elem_t ListIdGetElem (List * list, int id, ListDebugInfo debug_info);
 #define GetIdListKey(list, key) ListKeyGetId(list, key, DEBUG_INFO(list))
 int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info);
 
+#define GetValSortedListKey(list, key) ListKeyGetValSorted(list, key, DEBUG_INFO(list))
+int ListKeyGetValSorted (List * list, ht_key_t key, ListDebugInfo debug_info);
+
 /**
  * @brief insert "val" in the beginning of the list
  *
@@ -275,6 +285,9 @@ int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_in
 */
 #define InsertBeforeList(list, id, key) ListInsertBefore(list, id, key, DEBUG_INFO(list))
 int ListInsertBefore (List * list, int id, ht_key_t key, ListDebugInfo debug_info);
+
+#define InsertSortedList(list, key) ListInsertSorted(list, key, DEBUG_INFO(list))
+int ListInsertSorted (List * list, ht_key_t key, ListDebugInfo debug_info);
 
 /**
  * @brief delete and return value with id = "id".
