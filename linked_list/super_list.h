@@ -214,8 +214,8 @@ int ListMakeLinear (List * list); //! not finished
  * @return value stored in list->data[id]
  * @return LIST_POISON if "id" stores nothing or "id" is invalid
 */
-#define GetElemListId(list, id) ListIdGetElem(list, id, DEBUG_INFO(list))
-list_elem_t ListIdGetElem (List * list, int id, ListDebugInfo debug_info);
+#define GetValListId(list, id) ListIdGetVal(list, id, DEBUG_INFO(list))
+int ListIdGetVal (List * list, int id, ListDebugInfo debug_info);
 
 /**
  *

@@ -57,9 +57,9 @@ int HashTableGetVal (HashTable *hash_table, ht_key_t key)
         else
             return LIST_POISON.value;
 
-        list_elem_t l_elem = GetElemListId (hash_table->table[hash], elem_id);
+        int value = GetValListId (hash_table->table[hash], elem_id);
 
-        return l_elem.value;
+        return value;
 
     #endif // BRANCH_PREDICTION_OPTIMIZATION
 }
@@ -83,7 +83,8 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
 
     #ifdef BRANCH_PREDICTION_OPTIMIZATION
 
-        int ret_val = InsertSortedList (hash_table->table[hash], key);
+        // int ret_val = InsertSortedList (hash_table->table[hash], key);
+        int ret_val = InsertEndList (hash_table->table[hash], key);
 
     #else
 
@@ -96,7 +97,7 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
         }
 
         int ret_val = IncreaseValListId (hash_table->table[hash], elem_id);
-   
+
     #endif // BRANCH_PREDICTION_OPTIMIZATION
 
     return ret_val;
@@ -122,10 +123,10 @@ int HashTableLoadTargetData (HashTable *hash_table,
         buf_pos++;    // next letter
 
         HashTableInsert (hash_table, curr_word);
-        
+
         if (n_line % 10000 == 0)
             printf ("%d / %d\n", n_line, MAX_N_LINES);
-    } 
+    }
 
     return n_line + 1; // number of readen lines
 }

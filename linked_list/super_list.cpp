@@ -153,18 +153,18 @@ ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
     return REALLC_NO_ERR;
 }
 
-list_elem_t ListIdGetElem (List * list, int id, ListDebugInfo debug_info)
+int ListIdGetVal (List * list, int id, ListDebugInfo debug_info)
 {
-    assert (0 < id && id <= list->size);
     VERIFY_LIST(list, debug_info);
 
-    list_elem_t l_elem = LIST_POISON;
+    int value = LIST_POISON.value;
 
-    AssignListEl (&l_elem, &DATA(id));
+    if (0 < id && id <= list->size)
+        value = DATA (id).value;
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
-    return l_elem;
+    return value;
 }
 
 int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
