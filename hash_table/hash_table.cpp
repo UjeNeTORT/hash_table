@@ -110,7 +110,7 @@ int HashTableLoadTargetData (HashTable *hash_table,
     assert (hash_table);
     assert (delimited_text_buff);
 
-    int n_line = 0;
+    size_t n_line = 0;
     char *buf_pos = delimited_text_buff;
 
     for (n_line = 0; n_line < MAX_N_LINES; n_line++)
@@ -123,9 +123,6 @@ int HashTableLoadTargetData (HashTable *hash_table,
         buf_pos++;    // next letter
 
         HashTableInsert (hash_table, curr_word);
-
-        if (n_line % 10000 == 0)
-            printf ("%d / %d\n", n_line, MAX_N_LINES);
     }
 
     return n_line + 1; // number of readen lines

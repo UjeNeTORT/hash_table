@@ -16,7 +16,7 @@ int ListDump (const char * fname, List * list, size_t err_vec, ListDebugInfo deb
     int dump_id = rand();
 
     sprintf(command, "dot -Tpng %s -o linked_list/graph_dump/dumps/graph_dump_%d.png", fname, dump_id);
-    system(command);
+    if (system(command) != 0) ERROR ("Could not create dot code for list dump") ;
 
     WriteHTML(HTML_DUMP_FNAME, dump_id, err_vec, debug_info);
 

@@ -189,8 +189,8 @@ int ListKeyGetValSorted (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST(list, debug_info);
 
-    int value = LIST_POISON.value;
-    size_t curr_id = NEXT (0);
+    int value   = LIST_POISON.value;
+    int curr_id = NEXT (0);
 
     while (strcmp (DATA (curr_id).key, key) < 0)
     {
@@ -276,8 +276,8 @@ int ListInsertSorted (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
     VERIFY_LIST (list, debug_info);
 
-    int    new_id  = -1;
-    size_t curr_id = NEXT (0);
+    int new_id  = -1;
+    int curr_id = NEXT (0);
 
     if (list->size == 1)
     {

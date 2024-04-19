@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 typedef const char * ht_key_t;
-typedef volatile u_int64_t (* hash_func_ptr_t)(ht_key_t key);
+typedef u_int64_t (* hash_func_ptr_t)(ht_key_t key);
 typedef u_int64_t          hash_t;
 
 typedef struct

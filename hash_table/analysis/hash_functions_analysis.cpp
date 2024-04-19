@@ -21,10 +21,10 @@ int AnalyzeMultipleHashFunctions (const char * const * const analysis_results_pa
         ret_val = -1;
         goto cleanup_and_return;
     }
+    // ignore ret value
+    (void)!fread (preprocessed_target_data_buf, sizeof (char), fsize, preprocessed_target_data_file);
 
-    fread (preprocessed_target_data_buf, sizeof (char), fsize, preprocessed_target_data_file);
-
-    for (int n_hf = 0; n_hf < n_hash_functions; n_hf++)
+    for (size_t n_hf = 0; n_hf < n_hash_functions; n_hf++)
     {
         PrintProgressBar (n_hf, n_hash_functions);
 
@@ -76,8 +76,8 @@ int AnalyzeHashFunction (const char * const analysis_results_path,
     HashTableLoadTargetData (hash_table, target_data_copy, '\n');
 
     fprintf (results_file, "%s, %s\n", "id", "n");
-    for (int id = 0; id < hash_table_size; id++)
-        fprintf (results_file, "%d, %d\n", id,
+    for (size_t id = 0; id < hash_table_size; id++)
+        fprintf (results_file, "%lu, %d\n", id,
                             (hash_table->table[id]) ? hash_table->table[id]->cells_used : 0);
 
 cleanup_and_return:
@@ -113,8 +113,8 @@ int TestPerformanceMultipleHashFunctions (FILE                          *test_re
         ret_val = -1;
         goto cleanup_and_return;
     }
-
-    fread (preprocessed_target_data_buf, sizeof (char), fsize, preprocessed_target_data_file);
+    // ignore ret value
+    (void)!fread (preprocessed_target_data_buf, sizeof (char), fsize, preprocessed_target_data_file);
 
     fprintf (test_results_file, "name, mean, var, min_v, max_v\n");
     LOG ("Running tests...");
@@ -175,8 +175,6 @@ int TestPerformanceHashFunction (FILE               *test_results_file,
         test_name
     );
 
-cleanup_and_return:
-
     free (target_data_copy);
     HashTableDtor (hash_table);
 
@@ -207,9 +205,8 @@ int RunPerformanceTestHashTable (FILE               *test_results_file,
     size_t min_test_res = -1;
     size_t max_test_res = 0;
 
-    size_t max_fpos = GetFileSize (test_cases_file);
-
-    fscanf (test_cases_file, "%lu", &max_n_tests);
+    if (fscanf (test_cases_file, "%lu", &max_n_tests) != 1)
+        ERROR ("Could not read number of tests. Wrong file format!");
 
     u_int64_t *test_results = (u_int64_t *) calloc (max_n_tests, sizeof (u_int64_t));
 
