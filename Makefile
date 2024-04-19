@@ -1,7 +1,9 @@
-C_FLAGS =
+C_FLAGS = -Wall -Wextra
 
 CPP = g++
 OPTIMIZE = -O1
+DEBUG_INFO = -g
+
 SANITIZER = -fsanitize=address
 
 MAIN_NAME  = main
@@ -21,25 +23,25 @@ test-performance:
 	./$(EXEC_NAME) --test-performance hash_table/analysis/results/performance/res.csv texts/preprocessed/words_ready.txt texts/preprocessed/GeorgeRRMartin.txt
 
 main.o: ./$(MAIN_NAME).cpp
-	$(CPP) ./$(MAIN_NAME).cpp -c -o $(MAIN_NAME).o
+	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./$(MAIN_NAME).cpp -c -o $(MAIN_NAME).o
 
 common.o: ./common/*.*
-	$(CPP) ./common/common.cpp -c -o common.o
+	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./common/common.cpp -c -o common.o
 
 linked_list.o: ./linked_list/super_list.*
-	$(CPP) ./linked_list/super_list.cpp -c -o linked_list.o
+	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./linked_list/super_list.cpp -c -o linked_list.o
 
 list_dump.o: ./linked_list/graph_dump/*
-	$(CPP) ./linked_list/graph_dump/list_dump.cpp -c -o list_dump.o
+	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./linked_list/graph_dump/list_dump.cpp -c -o list_dump.o
 
 hash_table.o: ./hash_table/*
-	$(CPP) ./hash_table/hash_table.cpp -c -o hash_table.o
+	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./hash_table/hash_table.cpp -c -o hash_table.o
 
 hash_funcs.o: ./hash_table/hash_functions/*
-	$(CPP) ./hash_table/hash_functions/hash_functions.cpp -c -o hash_functions.o
+	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./hash_table/hash_functions/hash_functions.cpp -c -o hash_functions.o
 
 hf_analysis.o: ./hash_table/analysis/*
-	$(CPP) ./hash_table/analysis/hash_functions_analysis.cpp -c -o hash_functions_analysis.o
+	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./hash_table/analysis/hash_functions_analysis.cpp -c -o hash_functions_analysis.o
 
 clean:
 	rm -f $(EXEC_NAME)
