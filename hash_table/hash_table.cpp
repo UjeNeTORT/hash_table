@@ -21,7 +21,7 @@ void HashTableDtor (HashTable *hash_table)
 {
     assert (hash_table);
 
-    for (int i = 0; i < hash_table->size; i++)
+    for (size_t i = 0; i < hash_table->size; i++)
         if (hash_table->table[i]) ListDtor (hash_table->table[i]);
 
     hash_table->size = 0;
@@ -41,27 +41,14 @@ int HashTableGetVal (HashTable *hash_table, ht_key_t key)
 
     hash_t hash = hash_table->hash_func (key) % hash_table->size;
 
-    #ifdef BRANCH_PREDICTION_OPTIMIZATION
+    int elem_id = -1;
 
-        if (hash_table->table[hash])
-            return GetValSortedListKey (hash_table->table[hash], key);
-        else
-            return LIST_POISON.value;
+    if (hash_table->table[hash])
+        elem_id = GetIdListKey (hash_table->table[hash], key);
+    else
+        return LIST_POISON.value;
 
-    #else
-
-        int elem_id = -1;
-
-        if (hash_table->table[hash])
-            elem_id = GetIdListKey (hash_table->table[hash], key);
-        else
-            return LIST_POISON.value;
-
-        int value = GetValListId (hash_table->table[hash], elem_id);
-
-        return value;
-
-    #endif // BRANCH_PREDICTION_OPTIMIZATION
+    return GetValListId (hash_table->table[hash], elem_id);
 }
 
 int HashTableInsert (HashTable *hash_table, ht_key_t key)
@@ -81,24 +68,15 @@ int HashTableInsert (HashTable *hash_table, ht_key_t key)
         return ret_val;
     }
 
-    #ifdef BRANCH_PREDICTION_OPTIMIZATION
+    int elem_id = GetIdListKey (hash_table->table[hash], key);
 
-        // int ret_val = InsertSortedList (hash_table->table[hash], key);
-        int ret_val = InsertEndList (hash_table->table[hash], key);
+    if (elem_id == -1)
+    {
+        InsertEndList (hash_table->table[hash], key);
+        hash_table->n_elems++;
+    }
 
-    #else
-
-        int elem_id = GetIdListKey (hash_table->table[hash], key);
-
-        if (elem_id == -1)
-        {
-            InsertEndList (hash_table->table[hash], key);
-            hash_table->n_elems++;
-        }
-
-        int ret_val = IncreaseValListId (hash_table->table[hash], elem_id);
-
-    #endif // BRANCH_PREDICTION_OPTIMIZATION
+    int ret_val = IncreaseValListId (hash_table->table[hash], elem_id);
 
     return ret_val;
 }

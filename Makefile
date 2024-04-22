@@ -1,7 +1,7 @@
-C_FLAGS = -Wall -Wextra
+C_FLAGS = -Wall -DNDEBUG
 
 CPP = g++
-OPTIMIZE = -O1
+OPTIMIZE = -O2
 DEBUG_INFO = -g
 
 SANITIZER = -fsanitize=address
@@ -21,6 +21,9 @@ test:
 
 test-performance:
 	./$(EXEC_NAME) --test-performance hash_table/analysis/results/performance/res.csv texts/preprocessed/words_ready.txt texts/preprocessed/GeorgeRRMartin.txt
+
+test-performance-fast:
+	./$(EXEC_NAME) --test-performance hash_table/analysis/results/performance/res.csv  texts/preprocessed/testcases_small.txt texts/preprocessed/GeorgeRRMartin.txt
 
 main.o: ./$(MAIN_NAME).cpp
 	$(CPP) $(C_FLAGS) $(OPTIMIZE) $(DEBUG_INFO) ./$(MAIN_NAME).cpp -c -o $(MAIN_NAME).o

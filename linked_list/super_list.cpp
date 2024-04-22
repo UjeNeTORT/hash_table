@@ -174,7 +174,7 @@ int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
     int id = -1; // not found
 
     for (int i = NEXT(0); i != 0; i = NEXT(i))
-        if (streq (DATA(i).key, key))
+        if (!strcmp (DATA(i).key, key))
         {
             id = i;
             break;

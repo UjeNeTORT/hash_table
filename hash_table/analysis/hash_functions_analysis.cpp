@@ -214,11 +214,13 @@ int RunPerformanceTestHashTable (FILE               *test_results_file,
 
     LOG ("Start testing \"%s\" (%lu testcases, %lu ht n elems)", test_name, max_n_tests, hash_table->n_elems);
 
+    volatile int dummy_val = LIST_POISON.value;
+
     while (fscanf (test_cases_file, "%s\n", key) == 1)
     {
         u_int64_t test_res = -GetCPUTicks ();
 
-        HashTableGetVal (hash_table, key);
+        dummy_val = HashTableGetVal (hash_table, key);
 
         test_res += GetCPUTicks ();
 

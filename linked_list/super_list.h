@@ -10,10 +10,10 @@
 #include "../common/common.h"
 #include "graph_dump/list_dump.h"
 
+extern int strcmp_optimized (const char *s1, const char *s2);
+
 const char * const DOT_DUMP_FILENAME = "graph.dot";
 const char * const HTML_DUMP_FNAME   = "linked_list/graph_dump/dumps/dump1.html";
-
-#define LIST_DEBUG
 
 #ifdef LIST_DEBUG
     #define ON_DEBUG(...) __VA_ARGS__;
@@ -92,8 +92,8 @@ typedef enum
 
 typedef enum
 {
-    REALLC_NO_ERR    = 0, // successfully realloced
-    REALLC_FORBIDDEN = 1, // reallocation didnt happen (in case new_size <= size - such functionality is not provided)
+    REALLC_NO_ERR    = 0, // successfully reallocated
+    REALLC_FORBIDDEN = 1, // reallocation didn't happen (in case new_size <= size - such functionality is not provided)
     REALLC_ERR       = 2, // reallocation started but finished with error (realloc returned nullptr or func designed to treat such new_size as an error)
 } ListReallocRes;
 

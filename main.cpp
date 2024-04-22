@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-// #define NDEBUG
-
 #include "hash_table/hash_table.h"
 #include "hash_table/hash_functions/hash_functions.h"
 #include "hash_table/analysis/hash_functions_analysis.h"
