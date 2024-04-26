@@ -238,7 +238,7 @@ int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_in
     VERIFY_ID(list, id, debug_info);
 
     // if no room left - realloc
-    if (list->fre == list->size) ReallocList (list, list->size);
+    if (list->fre == list->size) ReallocList (list, list->size * 2);
 
     int new_id = list->fre;
     list->fre = NEXT(new_id);
