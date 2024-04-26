@@ -10,7 +10,7 @@
 #include "../common/common.h"
 #include "graph_dump/list_dump.h"
 
-extern int strcmp_optimized (const char *s1, const char *s2);
+extern "C" int strcmp_optimized (const char *s1, const char *s2);
 
 const char * const DOT_DUMP_FILENAME = "graph.dot";
 const char * const HTML_DUMP_FNAME   = "linked_list/graph_dump/dumps/dump1.html";

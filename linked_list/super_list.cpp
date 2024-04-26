@@ -174,11 +174,13 @@ int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
     int id = -1; // not found
 
     for (int i = NEXT(0); i != 0; i = NEXT(i))
-        if (!strcmp (DATA(i).key, key))
+    {
+        if (!strcmp_optimized (DATA(i).key, key))
         {
             id = i;
             break;
         }
+    }
 
     ON_DEBUG(VERIFY_LIST(list, debug_info));
 
@@ -236,7 +238,7 @@ int ListInsertAfterId (List * list, int id, ht_key_t key, ListDebugInfo debug_in
     VERIFY_ID(list, id, debug_info);
 
     // if no room left - realloc
-    if (list->fre == list->size) ReallocList (list, list->size + 1);
+    if (list->fre == list->size) ReallocList (list, list->size);
 
     int new_id = list->fre;
     list->fre = NEXT(new_id);

@@ -8,7 +8,8 @@
 - [ ] Выполнил 3 ассемблерные оптимизации, ускорившие работу в ??? раз
 
 ## Общие сведения по хэш-таблицам
-Хэш таблицы хранят пары ключ-значение, доступ к значению производится по ключу путем вычисления хэш функции $h(key)$. Таким образом мы имеем доступ к элементу за О(1). В идеальном мире значение $h(key)$ должно быть уникальным для каждого уникального $key$ и восроизводимым для одинаковых $key$.
+
+Хэш таблицы хранят пары ключ-значение, доступ к значению производится по ключу путем вычисления хэш функции $h(key)$. Таким образом мы имеем доступ к элементу за О(1). В идеальном мире значение $h(key)$ должно быть уникальным для каждого уникального $key$ и воспроизводимым для одинаковых $key$.
 В реальности же, часто бывает так, что возникает **коллизия**: $h(key1) = h(key2), key1 \neq key2$
 
 ### Разрешение коллизий
@@ -114,7 +115,7 @@ $h(key) = sum(key)$ - сумма ASCII кодов букв слова key
   <img alt="shows diagram with hash table working principles." src="img/load_hists/ctrl_sum_hf_long_ggplot.png">
 </picture>
 
-Расределение стало очень неравномерным, связано это с тем что сумма ascii кодов любого слова почти никогда не превышает какое-то значение из-за ограничений нашего языка.
+Распределение стало очень неравномерным, связано это с тем что сумма ascii кодов любого слова почти никогда не превышает какое-то значение из-за ограничений нашего языка.
 
 ### ROR hash function
 $h(key) = ???$
@@ -123,9 +124,9 @@ $h(key) = ???$
 $h(key) = crc32(key)$ - эта функция используется для коррекции ошибок, вызванных шумом, при передаче данных. Внутри себя она считает проверочное значение (check value). Функция, которая его считает часто используется как хэш-функция.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="img/load_hists/wd_len_hf_dark_background.png">
-  <source media="(prefers-color-scheme: light)" srcset="img/load_hists/wd_len_hf_ggplot.png">
-  <img alt="shows diagram with hash table working principles." src="img/load_hists/wd_len_ggplot.png">
+  <source media="(prefers-color-scheme: dark)" srcset="img/load_hists/crc32_hf_dark_background.png">
+  <source media="(prefers-color-scheme: light)" srcset="img/load_hists/сrc32_hf_ggplot.png">
+  <img alt="shows diagram with hash table working principles." src="img/load_hists/crc32_ggplot.png">
 </picture>
 
 Распределение выглядит хорошо: оно равномерно и нет больших незаселенных участков.
@@ -154,18 +155,154 @@ TODO
 
 Поэтому перед выполнением ассемблерных оптимизаций, я выполнил внеассемблерные.
 
-### Внеассемблерные оптимизации
+### Отключение *assert* и верификаторов
 
-Самые очевидные внеассемлерные оптимизации - выключить assertы и верификаторы структур данных, скомпилировать с ключами '-O2', '-O3'
+Самые очевидные внеассемблерные оптимизации - выключить assertы и верификаторы структур данных, скомпилировать с ключами '-O2', '-O3'
 
 Результаты приведены в таблице:
 
-| Оптимизация                                 | Относительное ускорение среднего времени поиска, % |
-| :------------------------------------------ | :------------------------------------------------: |
-| '-O1'                                       | 1                                                  |
-| '-O1' + отключение 'assert'                 | 104.8                                              |
-| '-O1' + отключение 'assert' и верификаторов | 148.8                                              |
-| '-O2' + отключение 'assert' и верификаторов | 160.3                                              |
-| '-O3' + отключение 'assert' и верификаторов | 137.9                                              |
+| Оптимизация                                 | Среднее время работы для $h = crc32$, TSC   | Относительное ускорение среднего времени поиска    |
+| :------------------------------------------ | :-----------------------------------------: | :------------------------------------------------: |
+| `-O0`                                       | 806                                         | 0.46                                               |
+| `-O1`                                       | 806                                         | 1                                                  |
+| `-O1` + отключение *assert*                 | 734                                         | 1.10                                               |
+| `-O1` + отключение *assert* и верификаторов | 567                                         | 1.42                                               |
+| `-O2` + отключение *assert* и верификаторов | 547                                         | 1.47                                               |
+| `-O3` + отключение *assert* и верификаторов | 592                                         | 1.36                                               |
+
+**Далее компилировать будем под `-O2` без assert и верификаторов.**
+
+### Оптимизация поиска на основе *branch prediction*
+
+*Гипотеза:* поддержание отсортированности списков в хэш-таблице позволит ускорить поиск, за счет уменьшения процента *branch-miss*.
+Обратная сторона - очень долгая вставка, но мы готовы идти на такие жертвы, т.к. ускоряем именно поиск.
+
+<blockquote>
+
+<code>no branch predicion optimization (time = ??? TSC)</code>
+
+    ```
+    Performance counter stats for 'make test-performance-fast':
+
+            4 479,35 msec task-clock                       #    0,999 CPUs utilized
+                  87      context-switches                 #   19,422 /sec
+                   6      cpu-migrations                   #    1,339 /sec
+               1 688      page-faults                      #  376,840 /sec
+      11 789 553 581      cycles                           #    2,632 GHz
+      21 975 980 072      instructions                     #    1,86  insn per cycle
+       4 708 847 553      branches                         #    1,051 G/sec
+         149 975 221      branch-misses                    #    3,18% of all branches
+    ```
+
+</blockquote>
+
+<blockquote>
+
+<code>no branch predicion optimization (time = ??? TSC)</code>
+
+    ```
+    Performance counter stats for 'make test-performance-fast':
+
+            4 479,35 msec task-clock                       #    0,999 CPUs utilized
+                  87      context-switches                 #   19,422 /sec
+                   6      cpu-migrations                   #    1,339 /sec
+               1 688      page-faults                      #  376,840 /sec
+      11 789 553 581      cycles                           #    2,632 GHz
+      21 975 980 072      instructions                     #    1,86  insn per cycle
+       4 708 847 553      branches                         #    1,051 G/sec
+         149 975 221      branch-misses                    #    3,18% of all branches
+    ```
+
+</blockquote>
+
+### Ускорение сравнения строк
+
+#### Обоснование
+
+В случае коллизии слова помещаются в связный список, в результате чего поиск слова в этом списке за `O(n)` - значительно дольше, чем поиск за `O(1)` в идеальной хэш-таблице.
+
+Во время поиска строки из списка сравниваются с ключевой строкой, в результате чего сравнение строк - самая часто-вызываемая функция.
+
+Это подтверждается профилировщиком:
+
+```
+sudo perf report --stdio --call-graph=fractal -Mintel --symbol-filter=RunPerformanceTestHashTable --percent-limit=2
+```
+
+<blockquote>
+
+```
+# Children      Self  Command  Shared Object  Symbol
+# ........  ........  .......  .............  ............................................
+#
+     3.73%     0.00%  exec     exec           [.] RunPerformanceTestHashTable(...)
+            |
+            ---RunPerformanceTestHashTable(_IO_FILE*, _IO_FILE*, HashTable*, char const*)
+               |
+               |--98.54%--HashTableGetVal(HashTable*, char const*)
+               |          |
+               |          |--99.66%--ListKeyGetId(List*, char const*, ListDebugInfo)
+               |          |          |
+               |          |          |--82.50%--__strcmp_avx2
+               |          |          |          |
+               |          |          |           --100.00%--asm_common_interrupt
+               |          |          |                     common_interrupt
+               |          |          |                     __common_interrupt
+               |          |          |                     handle_edge_irq
+               |          |          |
+               |          |           --17.50%--strcmp@plt
+               |           --0.34%--[...]
+                --1.46%--[...]
+```
+
+</blockquote>
+
+Посмотрим отдельно на функцию `ListKeyGetId`:
+
+<blockquote>
+
+```
+            for (int i = NEXT(0); i != 0; i = NEXT(i))
+│  0,17 │      mov     r13,QWORD PTR [rdi+0x8]
+│  0,29 │      mov     r12d,DWORD PTR [r13+0x0]
+│  0,02 │      test    r12d,r12d
+│       │    ↓ je      60
+│       │   if (!strcmp (DATA(i).key, key))
+│       │      mov     r14,QWORD PTR [rdi]
+│       │      mov     rbp,rsi
+│  0,00 │    ↓ jmp     32
+│       │      nop
+│       │   for (int i = NEXT(0); i != 0; i = NEXT(i))
+│  0,08 │28:   mov     r12d,DWORD PTR [r13+rbx*4+0x0]
+│  0,09 │      test    r12d,r12d
+│  0,25 │    ↓ je      60
+│       │   if (!strcmp (DATA(i).key, key))
+│ 22,07 │32:   movsxd  rbx,r12d
+│  0,08 │      mov     rsi,rbp
+│  0,00 │      mov     rax,rbx
+│  0,11 │      shl     rax,0x4
+│ 55,90 │      mov     rdi,QWORD PTR [r14+rax*1]
+│  0,16 │    → call    strcmp@plt
+│  0,03 │      test    eax,eax
+│ 20,60 │    ↑ jne     28
+
+```
+
+</blockquote>
+
+Часть кода, ответственная за вызов `strcmp` занимает более 50 % от времени выполнения самой горячей части кода *(на самом деле, не совсем от времени, но не будем вдаваться в подробности работы perf профайлера)* $=>$ оптимизируем ее.
+
+#### Оптимизация
+
+|Проблема|Предложение|
+|--------|-----------|
+|Во время поиска слова в списке нам достаточно информации равно оно текущему, или нет, то есть если у них не совпадают длины - такие слова гарантированно не равны | подавать слово на вход с "приклеенным" к нему слева байтом - его длиной, этот байт приклеивается во время препроцессинга
+|Если длины слов равны, их можно сравнивать с помощью SIMD инструкций, чтобы избежать лишних циклов|если слова влезают в YMM регистры - сравнивать их SIMD инструкциями, если нет - вызывать стандартный `strcmp`
+
+
 
 ## Источники
+- [часто-используемые в языке слова для тесткейсов](https://www.ef.com/wwen/english-resources/english-vocabulary/top-1000-words/)
+- [рандомные слова для тесткейсов](https://gist.github.com/cjhveal/3753018)
+- [СMOV instruction](https://www.felixcloutier.com/x86/cmovcc)
+-
