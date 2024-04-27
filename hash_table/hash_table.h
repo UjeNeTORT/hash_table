@@ -34,7 +34,13 @@ int HashTableLoadTargetData     (HashTable *hash_table,
                                  char      *delimited_text_buff,
                                  int        delimiter_char);
 
-int         HashTableVerifier   ();
-int         HashTableDump       ();
+int HashTableLoadTargetDataAligned (HashTable *hash_table,
+                                    char      *aligned_text_buff,
+                                    size_t    buf_size);
+
+int FillAlignedBuf (char *ptd_aligned,
+                    char *preprocessed_target_data_buf,
+                    char delimiter_char,
+                    size_t n_words);
 
 #endif // HASH_TABLE_H

@@ -105,25 +105,34 @@ int TestPerformanceMultipleHashFunctions (FILE                          *test_re
 
     size_t fsize = GetFileSize (preprocessed_target_data_file);
 
-    char *preprocessed_target_data_buf = (char *) calloc (fsize + 1, sizeof (char));
+    size_t n_words = 0;
+    fscanf (test_cases_file, "%ld", &n_words);
 
-    if (!preprocessed_target_data_buf)
+    char *preprocessed_target_data_buf = (char *) calloc (fsize + 1, sizeof (char));
+    char *ptd_aligned                  = (char *) aligned_alloc (PTD_ALIGNMENT, n_words * PTD_ALIGNMENT * sizeof(char));
+
+    if (!preprocessed_target_data_buf || !ptd_aligned)
     {
         ERROR ("Target data buffer allocation error");
         ret_val = -1;
         goto cleanup_and_return;
     }
+
     // ignore ret value
     (void)!fread (preprocessed_target_data_buf, sizeof (char), fsize, preprocessed_target_data_file);
 
+    FillAlignedBuf (ptd_aligned, preprocessed_target_data_buf, '\n', n_words);
+
     fprintf (test_results_file, "name, mean, var, min_v, max_v\n");
+
     LOG ("Running tests...");
     for (size_t n_hf = 0; n_hf < n_hash_functions; n_hf++)
     {
         TestPerformanceHashFunction (test_results_file,
                                      test_cases_file,
                                      tests_names[n_hf],
-                                     preprocessed_target_data_buf,
+                                     ptd_aligned,
+                                     n_words * PTD_ALIGNMENT,
                                      hash_functions[n_hf],
                                      hash_table_size);
 
@@ -137,6 +146,7 @@ int TestPerformanceMultipleHashFunctions (FILE                          *test_re
 cleanup_and_return:
 
     free (preprocessed_target_data_buf);
+    free (ptd_aligned);
 
     return ret_val;
 }
@@ -144,14 +154,15 @@ cleanup_and_return:
 int TestPerformanceHashFunction (FILE               *test_results_file,
                                  FILE               *test_cases_file,
                                  const char * const test_name,
-                                 const char         *preprocessed_target_data,
+                                 char               *ptd_aligned,
+                                 size_t             buf_size,
                                  hash_func_ptr_t    hash_function,
                                  size_t             hash_table_size)
 {
     assert (test_results_file);
     assert (test_cases_file);
     assert (test_name);
-    assert (preprocessed_target_data);
+    assert (ptd_aligned);
     assert (hash_function);
 
     int ret_val = 0;
@@ -160,11 +171,11 @@ int TestPerformanceHashFunction (FILE               *test_results_file,
 
     LOG ("hash table for \"%s\" test created", test_name);
 
-    char *target_data_copy = strdup (preprocessed_target_data);
+    char *ptd_aligned_copy = strdup (ptd_aligned);
 
     LOG ("Loading target data...");
 
-    HashTableLoadTargetData (hash_table, target_data_copy, '\n');
+    HashTableLoadTargetDataAligned (hash_table, ptd_aligned, buf_size);
 
     LOG ("target data loaded");
 
@@ -175,8 +186,8 @@ int TestPerformanceHashFunction (FILE               *test_results_file,
         test_name
     );
 
-    free (target_data_copy);
     HashTableDtor (hash_table);
+    free (ptd_aligned_copy);
 
     LOG ("hash table for \"%s\" test destroyed", test_name);
 
@@ -204,6 +215,8 @@ int RunPerformanceTestHashTable (FILE               *test_results_file,
     size_t sqr_delta    = 0;
     size_t min_test_res = -1;
     size_t max_test_res = 0;
+
+    rewind (test_cases_file);
 
     if (fscanf (test_cases_file, "%lu", &max_n_tests) != 1)
         ERROR ("Could not read number of tests. Wrong file format!");

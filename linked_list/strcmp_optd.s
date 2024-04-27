@@ -21,9 +21,12 @@ strcmp_optimized:
 
         jnz .not_equal
 
+        mov bl, BYTE [rdi]
         cmp bl, VECTOR_SIZE
 
         jb .strcmp_vectorized
+
+.std_strcmp:
 
         call strcmp
 
@@ -31,7 +34,21 @@ strcmp_optimized:
 
 .strcmp_vectorized:
 
-        call strcmp             ; todo vectorized
+        cmp cl, VECTOR_SIZE
+        ja .std_strcmp
+
+        xor rax, rax
+
+        ; ymm2 = [rdi], ymm3 = [rsi]
+        vmovdqa ymm1, [rsi]
+        vmovdqa ymm3, ymm1
+        vmovdqa ymm1, [rdi]
+        vmovdqa ymm2, ymm1
+
+        vpcmpeqb ymm1, ymm2, ymm3
+        vpmovmskb rax, ymm1
+
+        xor eax, -1
 
         jmp .func_end
 

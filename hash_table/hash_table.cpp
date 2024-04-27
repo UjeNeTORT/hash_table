@@ -105,3 +105,65 @@ int HashTableLoadTargetData (HashTable *hash_table,
 
     return n_line + 1; // number of readen lines
 }
+
+int HashTableLoadTargetDataAligned (HashTable *hash_table,
+                                    char      *aligned_text_buff,
+                                    size_t    buf_size)
+{
+    assert (hash_table);
+    assert (aligned_text_buff);
+
+    size_t n_line = 0;
+
+    char *buf_pos = aligned_text_buff;
+
+    for (n_line = 0; n_line < MAX_N_LINES; n_line++)
+    {
+        char *curr_word = buf_pos;
+
+        HashTableInsert (hash_table, curr_word);
+
+        int curr_wd_len = strlen (curr_word);
+        buf_pos += curr_wd_len + 1;
+        while (!*buf_pos)
+        {
+            if (buf_pos >= aligned_text_buff + buf_size) goto func_end;
+            buf_pos++;
+        }
+
+        if (buf_pos >= aligned_text_buff + buf_size) break;
+    }
+
+func_end:
+
+    return n_line + 1; // number of readen lines
+}
+
+
+int FillAlignedBuf (char *ptd_aligned,
+                    char *preprocessed_target_data_buf,
+                    char delimiter_char,
+                    size_t n_words)
+{
+    assert (ptd_aligned);
+    assert (preprocessed_target_data_buf);
+
+    char *ptd_aligned_tmp = ptd_aligned;
+    char *ptd_tmp         = preprocessed_target_data_buf;
+
+    for (int i = 0; i < n_words; i++)
+    {
+        char *delim_pos = strchr (ptd_tmp, delimiter_char);
+        if (!delim_pos) break;
+        *delim_pos = 0;
+
+        strcpy (ptd_aligned_tmp, ptd_tmp);
+        int curr_wd_len = strlen (ptd_tmp);
+        ptd_tmp += curr_wd_len + 1;
+        ptd_aligned_tmp += curr_wd_len + 1;
+
+        while ((int)(ptd_aligned_tmp - ptd_aligned) % PTD_ALIGNMENT) *(ptd_aligned_tmp++) = 0;
+    }
+
+    return 0;
+}

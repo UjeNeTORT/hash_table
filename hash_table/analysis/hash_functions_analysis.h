@@ -43,7 +43,8 @@ int TestPerformanceHashFunction
     FILE               *test_results_file,
     FILE               *test_cases_file,
     const char * const test_name,
-    const char         *preprocessed_target_data,
+    char               *ptd_aligned,
+    size_t             buf_size,
     hash_func_ptr_t    hash_function,
     size_t             hash_table_size
 );

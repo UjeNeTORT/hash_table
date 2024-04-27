@@ -14,12 +14,14 @@ typedef struct
     int      value;
 } list_elem_t;
 
-const list_elem_t   LIST_POISON             = {"pzn_data", -1};
-const size_t        DEFAULT_LIST_SIZE       = 1;
-const int           DEFAULT_LIST_ELEM_VALUE = 1;
+const int         PTD_ALIGNMENT           = 32;
 
-const int           MAX_WORD_LEN            = 50;
+const list_elem_t LIST_POISON             = {"pzn_data", -1};
+const size_t      DEFAULT_LIST_SIZE       = 1;
+const int         DEFAULT_LIST_ELEM_VALUE = 1;
 
-const size_t        PROGRESS_BAR_SYNC_PERIOD = 1e5;
+const int         MAX_WORD_LEN            = 50;
+
+const size_t      PROGRESS_BAR_SYNC_PERIOD = 1e5;
 
 #endif // CONFIG_H
