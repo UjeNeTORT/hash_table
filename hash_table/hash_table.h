@@ -34,9 +34,9 @@ int HashTableLoadTargetData     (HashTable *hash_table,
                                  char      *delimited_text_buff,
                                  int        delimiter_char);
 
-int HashTableLoadTargetDataAligned (HashTable *hash_table,
-                                    char      *aligned_text_buff,
-                                    size_t    buf_size);
+int HashTableLoadTargetDataAligned (HashTable  *hash_table,
+                                    const char *aligned_text_buff,
+                                    size_t     buf_size);
 
 int FillAlignedBuf (char *ptd_aligned,
                     char *preprocessed_target_data_buf,

@@ -6,12 +6,8 @@ HashTable *HashTableCtor (
 {
     HashTable *hash_table = (HashTable *) calloc (1, sizeof (HashTable));
 
-    hash_table->table = (List **) calloc (hash_table_size + 1, sizeof (List *));
-
-    // TODO check if size is prime
-
-    hash_table->size = hash_table_size;
-
+    hash_table->table     = (List **) calloc (hash_table_size + 1, sizeof (List *));
+    hash_table->size      = hash_table_size;
     hash_table->hash_func = hash_func_ptr;
 
     return hash_table;
@@ -97,8 +93,8 @@ int HashTableLoadTargetData (HashTable *hash_table,
 
         buf_pos = strchr (buf_pos, delimiter_char);
         if (!buf_pos) break; // no delimiters left => break
-        *buf_pos = 0; // delim char -> \0
-        buf_pos++;    // next letter
+        *buf_pos = 0;        // delim char -> \0
+        buf_pos++;           // next letter
 
         HashTableInsert (hash_table, curr_word);
     }
@@ -106,20 +102,20 @@ int HashTableLoadTargetData (HashTable *hash_table,
     return n_line + 1; // number of readen lines
 }
 
-int HashTableLoadTargetDataAligned (HashTable *hash_table,
-                                    char      *aligned_text_buff,
-                                    size_t    buf_size)
+int HashTableLoadTargetDataAligned (HashTable  *hash_table,
+                                    const char *aligned_text_buff,
+                                    size_t     buf_size)
 {
     assert (hash_table);
     assert (aligned_text_buff);
 
     size_t n_line = 0;
 
-    char *buf_pos = aligned_text_buff;
+    const char *buf_pos = aligned_text_buff;
 
     for (n_line = 0; n_line < MAX_N_LINES; n_line++)
     {
-        char *curr_word = buf_pos;
+        const char *curr_word = buf_pos;
 
         HashTableInsert (hash_table, curr_word);
 

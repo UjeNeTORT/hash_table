@@ -172,49 +172,6 @@ TODO
 
 **Далее компилировать будем под `-O2` без assert и верификаторов. Выбираем в качестве baseline.**
 
-### Оптимизация поиска на основе *branch prediction*
-
-*Гипотеза:* поддержание отсортированности списков в хэш-таблице позволит ускорить поиск, за счет уменьшения процента *branch-miss*.
-Обратная сторона - очень долгая вставка, но мы готовы идти на такие жертвы, т.к. ускоряем именно поиск.
-
-<blockquote>
-
-<code>no branch predicion optimization (time = ??? TSC)</code>
-
-    ```
-    Performance counter stats for 'make test-performance-fast':
-
-            4 479,35 msec task-clock                       #    0,999 CPUs utilized
-                  87      context-switches                 #   19,422 /sec
-                   6      cpu-migrations                   #    1,339 /sec
-               1 688      page-faults                      #  376,840 /sec
-      11 789 553 581      cycles                           #    2,632 GHz
-      21 975 980 072      instructions                     #    1,86  insn per cycle
-       4 708 847 553      branches                         #    1,051 G/sec
-         149 975 221      branch-misses                    #    3,18% of all branches
-    ```
-
-</blockquote>
-
-<blockquote>
-
-<code>no branch predicion optimization (time = ??? TSC)</code>
-
-    ```
-    Performance counter stats for 'make test-performance-fast':
-
-            4 479,35 msec task-clock                       #    0,999 CPUs utilized
-                  87      context-switches                 #   19,422 /sec
-                   6      cpu-migrations                   #    1,339 /sec
-               1 688      page-faults                      #  376,840 /sec
-      11 789 553 581      cycles                           #    2,632 GHz
-      21 975 980 072      instructions                     #    1,86  insn per cycle
-       4 708 847 553      branches                         #    1,051 G/sec
-         149 975 221      branch-misses                    #    3,18% of all branches
-    ```
-
-</blockquote>
-
 ### Ускорение сравнения строк
 
 #### Обоснование
@@ -378,7 +335,7 @@ for (int i = NEXT(0); i != 0; i = NEXT(i))
 
 #### Оптимизация
 
-Заменим вызов функции crc32 на ассемблерную вставку, выполняющую те же с помощью встроенной инструкции `crc32`
+Заменим вызов функции crc32 на ассемблерную вставку, выполняющую те же действия с помощью встроенной инструкции `crc32`
 
 <blockquote>
 
@@ -420,6 +377,15 @@ hash_t  CalcStrHashCRC32 (ht_key_t key)
 | Оптимизация `strcmp`                                   | 181                                         | 3.02                            | 3.02                                          |
 | Оптимизация `crc32`                                    | 176                                         | 3.11                            | 1.03                                          |
 
+Удостоверимся, что гистограмма заселенности не поменялась в результате оптимизации:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="img/load_hists/cmp_optd_dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="img/load_hists/cmp_optd_light.png">
+  <img alt="shows diagram with hash table working principles." src="img/load_hists/cmp_optd_light.png">
+</picture>
+
+**Один в один!**
 
 ## Источники
 **Данные для тестирования и заполнения хэш-таблиц**
