@@ -2,6 +2,7 @@
 #define HASH_FUNCTIONS_H
 
 #include <assert.h>
+#include <immintrin.h>
 #include <stdlib.h>
 #include <string.h>
 #include <zlib.h>

@@ -1,3 +1,5 @@
+; n_asm_lines = 38
+
 VECTOR_SIZE equ 128
 
 SECTION .text

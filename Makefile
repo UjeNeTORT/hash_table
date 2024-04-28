@@ -1,4 +1,4 @@
-C_FLAGS = -DNDEBUG
+C_FLAGS = -DNDEBUG -msse4.2
 
 CPP = g++
 OPTIMIZE = -O2
@@ -11,13 +11,13 @@ OBJS = obj/$(MAIN_NAME).o obj/common.o obj/list_dump.o obj/linked_list.o obj/has
 EXEC_NAME = exec
 
 start: main.o common.o list_dump.o linked_list.o  hash_table.o hash_funcs.o hf_analysis.o strcmp_optd.o
-	g++ -no-pie -o $(EXEC_NAME) $(OBJS) -lz -lc -mavx2 -fsanitize=address
+	g++ -no-pie -o $(EXEC_NAME) $(OBJS) -lz -lc -mavx2
 
 run:
 	./$(EXEC_NAME)
 
 test:
-	./$(EXEC_NAME) --analyze-hash-functions
+	./$(EXEC_NAME) --analyze-hash-functions texts/preprocessed/GeorgeRRMartin_chars.txt
 
 test-performance:
 	./$(EXEC_NAME) --test-performance hash_table/analysis/results/performance/res.csv texts/preprocessed/words_ready_chars.txt texts/preprocessed/GeorgeRRMartin_chars.txt
