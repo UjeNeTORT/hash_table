@@ -149,7 +149,7 @@ int FillAlignedBuf (char *ptd_aligned,
     assert (preprocessed_target_data_buf);
 
     char *ptd_aligned_tmp = ptd_aligned;
-    char *ptd_tmp         = preprocessed_target_data_buf;
+    char *ptd_tmp         = strchr (preprocessed_target_data_buf, delimiter_char) + 1; // skip first line - number of words
 
     for (int i = 0; i < n_words; i++)
     {

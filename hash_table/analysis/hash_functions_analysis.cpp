@@ -207,7 +207,7 @@ int RunPerformanceTestHashTable (FILE               *test_results_file,
 
     size_t n_test      = 0;
     size_t max_n_tests = 0;
-    char key[MAX_WORD_LEN] = {};
+    alignas(PTD_ALIGNMENT) char key[MAX_WORD_LEN] = {};
 
     size_t mean_val     = 0;
     double variance     = 0;
@@ -231,7 +231,7 @@ int RunPerformanceTestHashTable (FILE               *test_results_file,
 
     while (fscanf (test_cases_file, "%s\n", key) == 1)
     {
-        u_int64_t test_res = -GetCPUTicks ();
+        volatile u_int64_t test_res = -GetCPUTicks ();
 
         dummy_val = HashTableGetVal (hash_table, key);
 
