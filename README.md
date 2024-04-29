@@ -54,7 +54,82 @@
 
 Для анализа производительности в хэш-таблицу загружались слова из целевого текста. Дальше в буфер загружались слова из другого набора ('test_cases'). В файл с результатами сохранялись значения среднего времени поиска $\mu$, стандартного отклонения $\sigma^2$, минимальное время поиска и максимальное время поиска для каждого теста.
 
-По результатам тестирования строилась гистограмма
+По результатам тестирования строилась гистограмма заселенности.
+
+#### Воспроизведение результатов
+
+```
+make
+```
+
+Получить гистограммы заселенности для хэш-функций:
+
+1. ``` make test ```
+2. Запустить скрипт `hash_table/analysis/analyze_results.py`
+
+Гистограммы сохранятся в `hash_table/analysis/results/graphs`
+
+Если вы хотите добавить свою хэш-функцию на анализ:
+
+1. Напишите ее в соответствии указателю `typedef u_int64_t (* hash_func_ptr_t)(ht_key_t key);`
+2. Добавьте ее в файл `hash_table/hash_functions/hash_functions.cpp` и укажите прототип в `/hash_functions.h`.
+3. Добавьте в файл `main.cpp` данные по вашей функции:
+
+    <blockquote>
+
+    <code>main.cpp</code>
+
+    ```c
+    const hash_func_ptr_t HASH_FUNCS[] =
+    {
+        CalcStrHashReturnZero,
+        // ...
+        //      <----- function pointer of your hash function
+        // ...
+        CalcStrHashCRC32
+    };
+    const int N_HASH_FUNCS = sizearr (HASH_FUNCS);
+
+    const char * const TESTS_NAMES[] =
+    {
+        "return zero",
+        // ...
+        //      <----- name of your hash function
+        // ...
+        "crc32"
+    };
+
+    const char * const ANALYZE_HF_RES_PATHS[] =
+    {
+        "hash_table/analysis/results/csv/retzero_hf.csv",
+        // ...
+        //      <----- path to csv file with results for your hash function
+        // ...
+        "hash_table/analysis/results/csv/crc32_hf.csv"
+    };
+
+    ```
+
+    </blockquote>
+
+
+4. Добавьте в скрипт `hash_table/analysis/analyze_results.py` вызов функции `draw_load_hist(...)` с именем файла, куда вы сохранили результаты из п.3 БЕЗ РАСШИРЕНИЯ:
+
+    <blockquote>
+
+    <code>hash_table/analysis/analyze_results.py</code>
+
+    ```python
+    ...
+    # white bg color (optional)
+    draw_load_hist ("retzero_hf", "ggplot")
+
+    # dark bg color (optional)
+    draw_load_hist ("retzero_hf", "dark_background")
+    ```
+    </blockquote>
+
+> **Извинения:** python-скрипт написан плохо из-за нежелания тратить время на доскональное изучение matplotlib, поэтому придется вручную закрывать окошки с гистограммами по мере исполнения программы
 
 ### Return 0
 $h(key) = 0$ при любых входных данных.
@@ -116,8 +191,17 @@ $h(key) = sum(key)$ - сумма ASCII кодов букв слова key
 
 Распределение стало очень неравномерным, связано это с тем что сумма ascii кодов любого слова почти никогда не превышает какое-то значение из-за лингвистических ограничений.
 
-### ROR hash function
-$h(key) = ???$
+### ROL hash function
+
+$h(key) = h_{i-1}^{rol} \oplus c_i$
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="img/load_hists/rol_dark_background.png">
+  <source media="(prefers-color-scheme: light)" srcset="img/load_hists/rol_ggplot.png">
+  <img alt="shows diagram with hash table working principles." src="img/load_hists/ctrl_sum_ggplot.png">
+</picture>
+
+Хорошо, но не лучше следующей функции.
 
 ### CRC32 - cycle redundancy check
 $h(key) = crc32(key)$ - эта функция используется для коррекции ошибок, вызванных шумом, при передаче данных. Внутри себя она считает проверочное значение (check value). Функция, которая его считает часто используется как хэш-функция.
@@ -128,9 +212,9 @@ $h(key) = crc32(key)$ - эта функция используется для к
   <img alt="shows diagram with hash table working principles." src="img/load_hists/crc32_ggplot.png">
 </picture>
 
-Распределение выглядит хорошо: оно равномерно и нет больших незаселенных участков.
+Распределение выглядит хорошо: оно равномерно и нет больших незаселенных участков, это подтверждается самым низким значением дисперсии (variance) среди рассмотренных хэш-функций.
 
-*В дальнейшем я буду использовать именно эту хэш-функцию.*
+*В дальнейшем буду использовать crc32.*
 
 ## Измерение производительности
 
@@ -525,6 +609,7 @@ Caches (sum of all):
 - [x86 instruction reference](https://www.felixcloutier.com/x86/)
 - [СMOV instruction](https://www.felixcloutier.com/x86/cmovcc)
 - [ORACLE x86 Assembly Language Reference Manual](https://docs.oracle.com/cd/E36784_01/html/E36859/gntae.html#scrolltoc)
+- [ROL hash (watch Cyclic polynomial)](https://en.wikipedia.org/wiki/Rolling_hash)
 
 **Книги**
 - Randal E. Bryant and David R. O'Hallaron "Computer Systems: A Programmer's Perspective 3rd Edition"
