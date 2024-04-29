@@ -15,7 +15,7 @@ hash_t  CalcStrHashFirstLetter   (ht_key_t key);
 hash_t  CalcStrHashWordLength    (ht_key_t key);
 hash_t  CalcStrHashControlSum    (ht_key_t key);
 hash_t  CalcStrHashSumOverLength (ht_key_t key);
-hash_t  CalcStrHashDedFormula    (ht_key_t key);
+hash_t  CalcStrHashROL           (ht_key_t key);
 
 hash_t  CalcStrHashCRC32         (ht_key_t key);
 

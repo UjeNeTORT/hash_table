@@ -1,4 +1,4 @@
-C_FLAGS = -DNDEBUG -msse4.2
+C_FLAGS = -DNDEBUG -msse4.2 -mavx2
 
 CPP = g++
 OPTIMIZE = -O2

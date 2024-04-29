@@ -11,6 +11,7 @@ const hash_func_ptr_t HASH_FUNCS[] =
     CalcStrHashWordLength,
     CalcStrHashControlSum,
     CalcStrHashSumOverLength,
+    CalcStrHashROL,
     CalcStrHashCRC32
 };
 const int N_HASH_FUNCS = sizearr (HASH_FUNCS);
@@ -22,6 +23,7 @@ const char * const TESTS_NAMES[] =
     "word length",
     "control sum",
     "control sum over length",
+    "rol",
     "crc32"
 };
 
@@ -32,6 +34,7 @@ const char * const ANALYZE_HF_RES_PATHS[] =
     "hash_table/analysis/results/csv/wd_len_hf.csv",
     "hash_table/analysis/results/csv/ctrl_sum_hf.csv",
     "hash_table/analysis/results/csv/sum_by_len_hf.csv",
+    "hash_table/analysis/results/csv/rol.csv",
     "hash_table/analysis/results/csv/crc32_hf.csv"
 };
 
