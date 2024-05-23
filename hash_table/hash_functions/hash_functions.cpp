@@ -51,7 +51,8 @@ hash_t CalcStrHashROL    (ht_key_t key)
     hash_t hash = 0;
     u_int8_t i = 0;
 
-    while (key[i]) {
+    while (key[i])
+    {
         hash = ((hash << 1) | (hash >> 63));
         hash = hash ^ key[i];
         i++;

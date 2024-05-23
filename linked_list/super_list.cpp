@@ -74,7 +74,7 @@ int ListDtor (List * list)
 
 ListCopyRes ListCopy (List * list_dst, List * list_src, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list_src, debug_info);
+    VERIFY_LIST (list_src, debug_info);
 
     if (!memcpy(list_dst->data, list_src->data, list_src->size * sizeof(list_elem_t)))
     {
@@ -90,6 +90,7 @@ ListCopyRes ListCopy (List * list_dst, List * list_src, ListDebugInfo debug_info
     {
         return CPY_ERR_MEMCPY;
     }
+
     list_dst->fre = list_src->fre;
 
     return CPY_NO_ERR;
@@ -97,7 +98,7 @@ ListCopyRes ListCopy (List * list_dst, List * list_src, ListDebugInfo debug_info
 
 ListReallocRes ListRealloc  (List * list, int new_size, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list, debug_info);
+    VERIFY_LIST (list, debug_info);
 
     ListReallocRes ret_val = REALLC_NO_ERR;
 
@@ -114,7 +115,7 @@ ListReallocRes ListRealloc  (List * list, int new_size, ListDebugInfo debug_info
         ret_val = REALLC_FORBIDDEN;
     }
 
-    ON_DEBUG(VERIFY_LIST(list, debug_info));
+    ON_DEBUG (VERIFY_LIST (list, debug_info));
 
     return ret_val;
 }
@@ -122,7 +123,7 @@ ListReallocRes ListRealloc  (List * list, int new_size, ListDebugInfo debug_info
 static ListReallocRes
 ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list, debug_info);
+    VERIFY_LIST (list, debug_info);
 
     if (new_size <= list->size) return REALLC_ERR;
 
@@ -139,37 +140,37 @@ ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
 
     for (int i = id_free; i < new_size; i++)
     {
-        NEXT(i) = i + 1;
-        AssignListEl (&DATA(i), &LIST_POISON);
-        PREV(i) = -1;
+        NEXT (i) = i + 1;
+        AssignListEl (&DATA (i), &LIST_POISON);
+        PREV (i) = -1;
     }
 
     NEXT(new_size - 1) = new_size; // last element has no next
 
     list->size = new_size;
 
-    ON_DEBUG(VERIFY_LIST(list, debug_info));
+    ON_DEBUG (VERIFY_LIST (list, debug_info));
 
     return REALLC_NO_ERR;
 }
 
 int ListIdGetVal (List * list, int id, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list, debug_info);
+    VERIFY_LIST (list, debug_info);
 
     int value = LIST_POISON.value;
 
     if (0 < id && id <= list->size)
         value = DATA (id).value;
 
-    ON_DEBUG(VERIFY_LIST(list, debug_info));
+    ON_DEBUG (VERIFY_LIST (list, debug_info));
 
     return value;
 }
 
 int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list, debug_info);
+    VERIFY_LIST (list, debug_info);
 
     int id = -1; // not found
 
@@ -182,7 +183,7 @@ int ListKeyGetId (List * list, ht_key_t key, ListDebugInfo debug_info)
         }
     }
 
-    ON_DEBUG(VERIFY_LIST(list, debug_info));
+    ON_DEBUG (VERIFY_LIST (list, debug_info));
 
     return id;
 }
